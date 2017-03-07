@@ -1,0 +1,8 @@
+# Installation and server management
+- name: ensure supervisor is installed
+  apt: name={{ item }} state=present
+  with_items:
+    - supervisor
+
+- name: start supervisor
+  service: name=supervisor state=started enabled=true

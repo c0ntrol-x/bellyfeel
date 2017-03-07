@@ -1,0 +1,12 @@
+user: "ubuntu"
+extra_users:
+  orbit: "orbit"
+  th0ughtcr1me: "th0ughtcr1me"
+  d4v1ncy: "d4v1ncy"
+  sonic: "sonic"
+
+production_users:
+  orbit: "orbit"
+  th0ughtcr1me: "th0ughtcr1me"
+  d4v1ncy: "d4v1ncy"
+  sonic: "sonic"

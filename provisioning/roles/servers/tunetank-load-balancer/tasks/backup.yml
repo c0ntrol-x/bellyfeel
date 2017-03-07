@@ -1,0 +1,15 @@
+- name: ensure postgres backup conf dir exists
+  file: path="{{ application_conf_path }}" state=directory
+  tags:
+    - backup
+
+- name: ensure backup dir exists
+  file: path="{{ backup_folder_path }}" state=directory
+  tags:
+    - backup
+
+- name: ensure backup encryption key is in place
+  template: src=encryption_key dest="{{ encryption_key_path }}"
+            owner=root group=root mode=600
+  tags:
+    - backup

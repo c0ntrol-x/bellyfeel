@@ -1,0 +1,1 @@
+include COPYING *.md bellyfeel/migrations bellyfeel/migrations/* bellyfeel/static bellyfeel/static/* bellyfeel/static/dist bellyfeel/static/dist/* bellyfeel/static/templates bellyfeel/static/templates/* ez_setup.py

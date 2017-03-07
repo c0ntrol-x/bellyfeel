@@ -1,0 +1,68 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+    {% block css %}
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='swatch/cyborg/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='quill/quill.snow.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/main.css') }}" rel="stylesheet">
+    {% endblock %}
+    <title>{% block title %}bellyfeel.io{% endblock %}</title>
+    {% block head %}
+    {% endblock %}
+  </head>
+  <body>
+    {% block body_top %}{% endblock %}
+    {% block body %}
+    {% block nav %}
+    <nav class="{% block css_class_navbar %}navbar navbar-default{% endblock %}">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">{% block brand %}bellyfeel.io{% endblock %}</a>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            {% block navbar_items %}
+            <li><a href="{{ url_for('admin_login') }}">login</a></li>
+            {% endblock %}
+          </ul>
+
+          {% block navbar_right %}
+          <ul class="nav navbar-nav navbar-right">
+            {% block navbar_items_right %}
+            <li><a href="{{ url_for('admin_logout') }}">logout</a></li>
+            {% endblock %}
+          </ul>
+          {% endblock %}
+        </div><!-- /.nav-collapse -->
+      </div>
+    </nav>
+
+    {% endblock %}
+    {# endblock nav #}
+    {% block body_trunk %}
+    <div class="container">
+      {% block container %}
+      {% endblock %}
+    </div><!-- /.container -->
+    {% endblock %}
+    {# endblock body_trunk #}
+    {% endblock %}
+    {# endblock body #}
+    {% block script %}
+    <script type="text/javascript" src="{{ url_for('static', filename='js/underscore-min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='quill/quill.min.js') }}"></script>
+    {% endblock %}
+    {% block body_bottom %}{% endblock %}
+  </body>
+</html>

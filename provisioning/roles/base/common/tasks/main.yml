@@ -1,0 +1,122 @@
+# Ensure hostname
+
+# - name: ensure that hostname is set
+#   hostname: name="{{ boteco.machine.get('domain', boteco.machine.name) }}"
+#   when: boteco.machine
+
+# Python infrastructure
+
+- name: ensure apt is ok
+  shell: sudo dpkg --configure -a
+
+- name: install os requirements
+  apt: name={{ item }} state=installed update_cache=yes
+  with_items:
+    - git
+    - libxml2-dev
+    - libxslt1-dev
+    - build-essential
+    - python-pip
+    - python-passlib
+    - python-psycopg2
+    - python-virtualenv
+    - python-software-properties
+    - vim
+    - libffi-dev
+    - pkg-config
+    - htop
+    - iotop
+    - libtool
+    - logrotate
+    - libpq-dev
+    - zlib1g-dev
+    - libssl-dev
+    - mysql-client
+    - screen
+    - libevent-dev
+    - libreadline-dev
+    - python-dev
+    - zip
+
+- name: install global python requirements
+  pip: name={{ item }}
+  with_items:
+    - httplib2
+    - requests
+    - awscli
+    - distribute==0.7.3
+
+- name: install github client
+  template: src=github-tool dest=/usr/local/bin/github-tool
+            owner=root group=root mode=0555
+
+- name: create log dirs
+  file: path="/var/log/{{ application_name }}"
+    owner={{ user }} state=directory recurse=yes
+
+- name: create non-production users
+  user: name={{ item.key }} generate_ssh_key=yes shell=/bin/bash createhome=yes groups=admin,adm,sudo append=yes
+  with_dict: extra_users
+  tags:
+    - user
+  when: "'{{ environment_name }}' != 'production'"
+
+- name: create production users
+  user: name={{ item.key }} generate_ssh_key=yes shell=/bin/bash createhome=yes groups=admin,adm,sudo append=yes
+  with_dict: production_users
+  tags:
+    - user
+  when: "'{{ environment_name }}' == 'production'"
+
+- name: place ssh keys for each extra user
+  shell: "curl https://github.com/{{ item.value }}.keys >> /home/{{ item.key }}/.ssh/authorized_keys"
+  with_dict: extra_users
+  tags:
+    - user
+  when: "'{{ environment_name }}' != 'production'"
+
+- name: "authorize non-production users for user {{ user }}"
+  shell: "curl https://github.com/{{ item.value }}.keys >> /home/{{ user }}/.ssh/authorized_keys"
+  with_dict: extra_users
+  tags:
+    - user
+  when: "'{{ environment_name }}' != 'production'"
+
+- name: "authorize production users for user {{ user }}"
+  shell: "curl https://github.com/{{ item.value }}.keys >> /home/{{ user }}/.ssh/authorized_keys"
+  with_dict: production_users
+  tags:
+    - user
+  when: "'{{ environment_name }}' == 'production'"
+
+- name: place ssh keys for each production user
+  shell: "curl https://github.com/{{ item.value }}.keys >> /home/{{ item.key }}/.ssh/authorized_keys"
+  with_dict: production_users
+  tags:
+    - user
+  when: "'{{ environment_name }}' == 'production'"
+
+- name: place ensure permission for extra users keys
+  file: path="/home/{{ item.key }}/.ssh/authorized_keys" owner="{{ item.key }}" group="{{ item.key }}" mode=0660
+  with_dict: extra_users
+  tags:
+    - user
+  when: "'{{ environment_name }}' != 'production'"
+
+- name: place ensure permission for production users keys
+  file: path="/home/{{ item.key }}/.ssh/authorized_keys" owner="{{ item.key }}" group="{{ item.key }}" mode=0660
+  with_dict: production_users
+  tags:
+    - user
+  when: "'{{ environment_name }}' == 'production'"
+
+- name: Add user remote to sudoers
+  lineinfile:
+    "dest='/etc/sudoers'
+    regexp='^{{ item.key }} ALL'
+    line='{{ item.key }} ALL=(ALL) NOPASSWD: ALL'
+    state=present"
+
+  with_dict: extra_users
+  tags:
+    - user

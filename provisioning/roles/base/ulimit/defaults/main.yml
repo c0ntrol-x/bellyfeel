@@ -1,0 +1,6 @@
+system_max_file_descriptors: 65536
+ulimit_config:
+  - {domain: '*', type: soft, item: nofile, value: 65536}
+  - {domain: '*', type: hard, item: nofile, value: 65536}
+  - {domain: 'root', type: soft, item: nofile, value: 65536}
+  - {domain: 'root', type: hard, item: nofile, value: 65536}

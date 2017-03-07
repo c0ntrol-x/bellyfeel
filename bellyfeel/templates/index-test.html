@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="container">
+  <!-- Example row of columns -->
+  <div class="row">
+    <div class="col-md-4">
+      <h2>Security</h2>
+      <p>We rely on free Let's Encrypt SSL certificates for clearnet access.</p>
+      <p>This webpage can also be reached from <a href="{{ url_for('onion') }}">Tor.</a> We built ourselves to survive oppressive governments.</p>
+      <p><a class="btn btn-default btn-success" href="{{ url_for('about_security') }}" role="button">More about security &raquo;</a></p>
+    </div>
+
+    <div class="col-md-4">
+      <h2>Privacy</h2>
+      <p>Authors can join by simply submitting their public PGP key.</p>
+      <p>On top of SSL/Tor your initial access password is encrypted with the public PGP key.</p>
+      <p><a class="btn btn-default btn-primary" href="{{ url_for('about_privacy') }}" role="button">More about privacy &raquo;</a></p>
+    </div>
+
+    <div class="col-md-4">
+      <h2>Anonymity</h2>
+      <p>Authors are welcome to provide a PGP public key of their pseudonym.</p>
+      <p>We also provide authors with a free, PGP encrypted email account.</p>
+      <p><a class="btn btn-default btn-danger" href="{{ url_for('about_anonimity') }}" role="button">More about anonymity &raquo;</a></p>
+    </div>
+
+
+  </div>
+
+  <hr>
+
+  <div class="jumbotron">
+    <center>
+    <div class="container">
+      <a class="btn btn-warning btn-lg" href="{{ url_for('user_login') }}" role="button">login</a>
+    </div>
+    </center>
+  </div>
+
+
+  <footer>
+    <p>&copy; ctrlx.world</p>
+  </footer>
+</div> <!-- /container -->
+{% endblock %}
+{% block body_bottom %}{% endblock %}

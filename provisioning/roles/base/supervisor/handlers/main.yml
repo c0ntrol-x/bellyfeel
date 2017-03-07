@@ -1,0 +1,11 @@
+- name: restart supervisor
+  service: name=supervisor state=restarted
+
+- name: start supervisor
+  service: name=supervisor state=started
+
+- name: reload supervisor
+  shell: service supervisor force-reload
+
+- name: reread supervisor
+  shell: /usr/bin/supervisorctl reread && /usr/bin/supervisorctl update

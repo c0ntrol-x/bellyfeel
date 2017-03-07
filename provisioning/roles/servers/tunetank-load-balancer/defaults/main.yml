@@ -1,0 +1,10 @@
+app_environment:
+  PORT: "4200"
+  LOGLEVEL: "DEBUG"
+  HOST: "{{ dns_bellyfeelapi }}"
+  DOMAIN: "{{ dns_bellyfeelapi }}"
+  PATH: "/srv/bellyfeelapi/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/srv/redis/bin"
+  PYTHONPATH: "/srv/bellyfeelapi/src:/srv/bellyfeelapi/venv/lib/python2.7/site-packages:$PYTHONPATH"
+  PYTHONDONTWRITEBYTECODE: "x"
+  STATIC_BASE_URL: "http://{{ dns_bellyfeelapi }}/static/build"
+  LANG: "en_US.utf8"

@@ -1,0 +1,15 @@
+- name: add nodejs ppa
+  command: add-apt-repository -y ppa:chris-lea/node.js
+    creates=/etc/apt/sources.list.d/chris-lea-node_js-precise.list
+
+- name: ensure nodejs is installed
+  apt: pkg=nodejs state=latest update_cache=yes
+
+- name: install global node dependencies
+  command: npm install -g {{ item.key }}
+    creates={{ item.value }}
+  with_dict:
+      bower: "/usr/bin/bower"
+      less: "/usr/bin/lessc"
+      recess: "/usr/bin/recess"
+      coffee-script: "/usr/bin/coffee"

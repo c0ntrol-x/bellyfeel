@@ -1,0 +1,20 @@
+---
+
+# Change this to pin your nginx version.
+# This track the stable repos, not mainline.
+# You can use wildcards here.
+nginx_version: 1.10.*
+
+nginx_user: www-data
+nginx_group: "{{nginx_user}}"
+
+
+# Locations
+# ---------
+
+nginx_conf_dir: /etc/nginx
+nginx_additional_conf_dir: "{{nginx_conf_dir}}/conf.d"
+nginx_log_dir: /var/log/nginx
+nginx_runtime_dir: /var/run
+nginx_available_sites_dir: "{{nginx_conf_dir}}/sites-available"
+nginx_enabled_sites_dir: "{{nginx_conf_dir}}/sites-enabled"

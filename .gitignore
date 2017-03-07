@@ -1,0 +1,15 @@
+*.egg-info
+*.pyc
+*~
+*#*
+.#*
+.*#*
+.coverage
+.coverage
+/.vagrant/
+inbox/*
+mail
+mail/*
+provisioning/playbook.retry
+*.log
+provisioning/bellyfeelio-vault.yml

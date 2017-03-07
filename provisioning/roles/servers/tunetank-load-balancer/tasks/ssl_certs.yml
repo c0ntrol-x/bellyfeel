@@ -1,0 +1,36 @@
+- name: ensure certificate dir exists
+  file: path="{{ ssl_certificate_path }}" state=directory
+  tags:
+    - ssl
+
+- name: copy encrypted ssl certificate file
+  copy: src="{{ ssl_tarball_filename }}" dest="{{ ssl_certificate_path }}/certs.tar.aes256" owner=root group=root mode=644 backup=yes
+  tags:
+    - ssl
+
+- name: decrypt the tarball with ssh certs
+  command: openssl aes-256-cbc -d -a -salt -in "{{ ssl_certificate_path }}/certs.tar.aes256" -out certs.tar.bz2 -pass env:TARBALL_DEC_KEY
+    chdir="{{ ssl_certificate_path }}"
+  environment:
+    TARBALL_DEC_KEY: "{{ encryption_key_raw }}"
+  tags:
+    - ssl
+
+- name: decompress ssl keys
+  command: tar xjvf certs.tar.bz2
+    chdir="{{ ssl_certificate_path }}"
+  tags:
+    - ssl
+
+- name: fix ownership of ssl certs
+  command: chown -R root "{{ ssl_certificate_path }}"
+    chdir="{{ ssl_certificate_path }}"
+  tags:
+    - ssl
+
+
+- name: fix permission of ssl certs
+  command: chmod -R 600 "{{ ssl_certificate_path }}"
+    chdir="{{ ssl_certificate_path }}"
+  tags:
+    - ssl

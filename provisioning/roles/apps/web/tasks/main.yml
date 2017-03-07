@@ -1,0 +1,12 @@
+- name: rotate logs
+  shell: logrotate -f /etc/logrotate.conf
+  ignore_errors: true
+
+- name: remove compressed log backups [DANGER]
+  shell: find /var/log -name '*.gz' -exec rm -fv {} \;
+  ignore_errors: true
+
+
+- include: app.yml
+- include: mysql-access.yml
+- include: nginx.yml

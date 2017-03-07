@@ -1,0 +1,24 @@
+- name: increase file descriptor limits
+  sysctl: >
+    name="fs.file-max"
+    value="{{ system_max_file_descriptors }}"
+    sysctl_set="yes"
+    sysctl_file="/etc/sysctl.d/60-file-limits.conf"
+
+- name: file-limits conf
+  template: >
+    src="file-limits.conf.j2"
+    dest="/etc/security/limits.d/file-limits.conf"
+
+# - name: update pam.d su file
+#   replace: >
+#     dest="/etc/pam.d/su"
+#     regexp='^# session    required   pam_limits.so$'
+#     replace='session    required   pam_limits.so'
+
+- name: add limits to common-session
+  lineinfile: >
+    dest="/etc/pam.d/common-session"
+    state="present"
+    regexp="^session\s+required\s+pam_limits.so$"
+    line="session required pam_limits.so"

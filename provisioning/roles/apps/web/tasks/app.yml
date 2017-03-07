@@ -1,0 +1,106 @@
+- name: "[base] installing dependencies"
+  apt: name={{ item }} state=present update_cache=yes cache_valid_time=3600 autoremove=yes
+  with_items:
+    - bash-completion
+    - build-essential
+    - ca-certificates
+    - curl
+    - docker.io
+    - emacs24-nox
+    - git
+    - git-svn
+    - gnupg
+    - gnupg2
+    - htop
+    - libev-dev
+    - libffi-dev
+    - libmp3lame-dev
+    - libmysqlclient-dev
+    - libnacl-dev
+    - libssl-dev
+    - libudev-dev
+    - libxml2-dev
+    - libxslt1-dev
+    - libzmq-dev
+    - mysql-client
+    - mysql-server
+    - nginx
+    - ntp
+    - pkg-config
+    - python
+    - python-dev
+    - python-mysqldb
+    - python-pip
+    - python-virtualenv
+    - redis-server
+    - redis-tools
+    - rng-tools
+    - rsync
+    - subversion
+    - telnet
+    - tree
+    - vim
+    - virtualenvwrapper
+    - wget
+    - libxml2-dev
+    - libxslt1-dev
+
+- name: rsync local codebase contents to the server
+  synchronize: src="{{ local_repository_root_path }}" dest="{{ src_path }}" recursive=yes perms=yes compress=yes
+  notify:
+    - restart bellyfeel-app
+
+- name: ensure docs folder
+  file: path="/srv/docs" state=directory
+
+- name: ensure private folder
+  file: path="/srv/private" state=directory
+
+- name: ensure log dirs
+  file: path="{{ item }}" state=directory mode=0775 owner=root group=www-data
+  with_items:
+    - /var/log/gunicorn
+    - /etc/nginx/sites-available
+    - /etc/nginx/sites-enabled
+
+- name: fix owner permissions on {{ src_path }}
+  file: path={{ src_path }} owner=www-data group=www-data recurse=yes mode=0775
+
+- name: install latest setuptools
+  pip: name=setuptools state=latest
+       virtualenv="{{ venv_path }}"
+
+- name: install latest pip
+  pip: name=pip state=latest
+       virtualenv="{{ venv_path }}"
+
+- name: install requirements
+  pip: requirements="{{ src_path }}/requirements.txt"
+       virtualenv="{{ venv_path }}"
+
+- name: install bellyfeel-app upstart script
+  file: path="/etc/init/python-app.conf"
+        state=absent
+  tags:
+    - backend
+
+- name: install bellyfeel-app upstart script
+  template: src=gunicorn.upstart
+    dest="/etc/init/bellyfeel-app.conf"
+    owner=root group=root mode=644
+  notify: restart bellyfeel-app
+  tags:
+    - backend
+
+- name: install bellyfeel-app upstart logrotate
+  template: src=logrotate.gunicorn.j2
+    dest="/etc/logrotate.d/bellyfeel-app"
+    owner=root group=root mode=644
+  tags:
+    - backend
+
+- name: test bellyfeel-app upstart script
+  shell: init-checkconf /etc/init/bellyfeel-app.conf && initctl check-config bellyfeel-app
+  notify: restart bellyfeel-app
+  tags:
+    - backend

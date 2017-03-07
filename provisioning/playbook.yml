@@ -1,0 +1,31 @@
+---
+- hosts:
+    - bellyfeel.io
+
+  user: root
+
+  vars_files:
+    - "bellyfeel-vault.yml"
+
+  tasks:
+    - debug: var=ansible_all_ipv4_addresses
+
+  roles:
+    # # automatic mount droplet volumes and update fstab
+    # # - digitalocean
+
+    # - base/enable-standard-cronjobs
+    # - base/system-updates
+    # - base/nginx
+    # - base/ulimit
+
+    # - security/system-hardening
+    # - security/firewall
+
+    # - servers/mysql-db
+    # - servers/redis
+    # - servers/memcached
+    # - servers/onion
+
+    # - apps/ssl
+    - apps/web

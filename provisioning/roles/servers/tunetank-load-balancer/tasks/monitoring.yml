@@ -1,0 +1,2 @@
+# - name: install copper egg
+#   shell: "curl -sk http://{{ copper_egg_token }}@api.copperegg.com/rc.sh | sh"

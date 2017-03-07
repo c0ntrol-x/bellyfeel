@@ -1,0 +1,55 @@
+---
+
+# Targeting specific OSes or distributions:
+#
+#   - `ansible_system`               → Linux, BSD, ...
+#   - `ansible_os_family`            → Debian, RedHat, ...
+#   - `ansible_distribution`         → Debian, Ubuntu, RedHat, ...
+#   - `ansible_distribution_release` → precise, wheezy, ...
+#   - `ansible_pkg_mgr`              → apt, yum, ...
+#   - `ansible_architecture`         → x86_64, x86_32, ...
+
+
+# Debian
+# ------
+
+- name: Adding APT repository key
+  apt_key:
+    url: "http://nginx.org/keys/nginx_signing.key"
+  tags:
+    - nginx
+    - frontend
+    - repo
+
+- name: Add official APT repository
+  apt_repository:
+    repo: "deb http://nginx.org/packages/{{ansible_distribution|lower}}/ {{ansible_distribution_release}} nginx"
+  tags:
+    - nginx
+    - frontend
+    - repo
+
+- name: remove older nginx versions
+  apt:
+    name: "{{item}}"
+    state: absent
+    autoremove: yes
+  with_items:
+    - nginx
+    - nginx-common
+
+  tags:
+    - nginx
+    - frontend
+    - deps
+
+- name: Install Nginx
+  apt:
+    name: "nginx={{nginx_version}}"
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600
+  tags:
+    - nginx
+    - frontend
+    - deps

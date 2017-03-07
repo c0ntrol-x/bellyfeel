@@ -1,0 +1,8 @@
+---
+
+parrotmail_install_dir: /srv/parrotmail/src
+parrotmail_venv_dir: /srv/parrotmail/venv
+parrotmail_inbox_dir: /srv/parrotmail/inbox
+parrotmail_user: root
+parrotmail_group: root
+parrotmail_smtp_port: 25

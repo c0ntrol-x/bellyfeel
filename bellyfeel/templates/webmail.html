@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block brand %}webmail{% endblock %}
+{% block title %}webmail{% endblock %}
+{% block css_class_navbar %}navbar navbar-inverse{% endblock %}
+{% block body_trunk %}
+<div class="container-responsive">
+    <div class="row">
+      <div class="col-md-1">
+        <ul class="nav nav-tabs nav-stacked">
+          <li role="presentation"><a href="/webmail">Home</a></li>
+          <li role="presentation"><a href="/webmail/inbox">Inbox</a></li>
+          <li role="presentation"><a href="/webmail/archive">Archive</a></li>
+          <li role="presentation"><a href="/webmail/sent">Sent Mail</a></li>
+        </ul>
+      </div>
+      <div class="col-md-10">
+        <div class="container">
+          {% include "email.table.html" %}
+        </div>
+      </div>
+      <div class="col-md-1">
+        <h4>senders</h4>
+        <ul class="nav nav-pills nav-stacked">
+          {% for contact in contacts %}
+          <li role="presentation"><a href="/webmail/compose/{{ contact.email }}">{{ contact.email }}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+</div>
+{% endblock %}
+{% block body_bottom %}{% endblock %}
+
+{% block navbar_items %}
+<li><a href="/webmail">Home</a></li>
+<li><a href="/webmail/inbox">Inbox</a></li>
+<li><a href="/webmail/archive">Archive</a></li>
+<li><a href="/webmail/sent">Sent Mail</a></li>
+{% endblock %}
+
+
+{% block navbar_right %}
+{% endblock %}

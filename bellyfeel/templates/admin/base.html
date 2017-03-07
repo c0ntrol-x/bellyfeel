@@ -1,0 +1,28 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+    {% block css %}
+    <link href="{{ url_for('static', filename='font-awesome/css/font-awesome.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/sb-admin.css') }}" rel="stylesheet">
+    <!-- <link href="{{ url_for('static', filename='swatch/paper/bootstrap.min.css') }}" rel="stylesheet"> -->
+    {% endblock %}
+    <title>{% block title %}bellyfeel.io{% endblock %}</title>
+    {% block head %}
+    {% endblock %}
+  </head>
+  <body>
+    {% block body_top %}{% endblock %}{# body_top #}
+    {% block body %}
+    {% endblock %}{# body #}
+    {% block script %}
+    <script type="text/javascript" src="{{ url_for('static', filename='js/underscore-min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='quill/quill.min.js') }}"></script>
+    {% endblock %}{# script #}
+    {% block body_bottom %}{% endblock %}{# body_top #}
+  </body>
+</html>

@@ -1,0 +1,51 @@
+---
+
+# TODO: convert to ansible:
+# $sh_c 'apt-get update'
+# # Debian8.3 does not include https support out of the box
+# $sh_c 'apt-get install -y apt-transport-https'
+# $sh_c 'curl https://repos.sonar.digitalocean.com/sonar-agent.asc | apt-key add -'
+# $sh_c 'echo "deb https://repos.sonar.digitalocean.com/apt main main" > /etc/apt/sources.list.d/digitalocean-agent.list'
+# $sh_c 'apt-get update'
+# $sh_c 'apt-get install do-agent -y'
+
+# - name: "[digital-ocean] place monitoring services installation script under /tmp"
+#   copy:
+#     src: install-monitoring-graphs.sh
+#     dest: /tmp/install-monitoring-graphs.sh
+#     owner: root
+#     group: root
+#     mode: 0700
+
+# - name: "[digital-ocean] run monitoring services installation script"
+#   shell: "/tmp/install-monitoring-graphs.sh"
+#   ignore_errors: yes
+
+# - name: "[digital-ocean] remove monitoring services installation script"
+#   file: path="/tmp/install-monitoring-graphs.sh" state=absent
+
+- name: "[digital-ocean] create mountpoint directories"
+  file:
+    path="{{ item.mountpoint }}"
+    state=directory
+  with_items: "{{ digital_ocean_volumes }}"
+
+- name: "[digital-ocean] configure volumes with ext4"
+  shell: "mkfs.ext4 -F /dev/disk/by-id/scsi-0DO_Volume_{{ item.name }}"
+  ignore_errors: yes
+  with_items: "{{ digital_ocean_volumes }}"
+
+- name: "[digital-ocean] mount volumes"
+  shell: "mount -o discard,defaults /dev/disk/by-id/scsi-0DO_Volume_{{ item.name }} {{ item.mountpoint }}"
+  ignore_errors: yes
+  with_items: "{{ digital_ocean_volumes }}"
+
+- name: "[digital-ocean] configure fstab"
+  template: src=fstab.j2
+    dest="/etc/fstab"
+    owner=root
+    group=root
+    mode=644
+
+- name: "[digital-ocean] reload fstab"
+  shell: mount -a

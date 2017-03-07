@@ -1,0 +1,14 @@
+repository_name: bellyfeel-dash
+repository_version: stable
+application_name: bellyfeelapi
+application_path: /srv/bellyfeelapi/src
+application_conf_path: /srv/bellyfeelapi/etc
+encryption_key_path: "/srv/bellyfeelapi/.pplr{{ environment_name }}aes256"
+virtualenv_path: /srv/bellyfeelapi/venv
+bellyfeelapi_port_number: 6969
+travis_tool_port_number: 4242
+s3_postgres_backup_conf_path: /srv/bellyfeelapi/etc/backup.conf.sh
+s3_backup_bucket_name: "bellyfeel_{{ environment_name }}_backups"
+ssl_certificate_path: "/srv/{{ application_name }}/certs"
+backup_folder_path: "/srv/backups"
+hello_sign_test_mode: "true"

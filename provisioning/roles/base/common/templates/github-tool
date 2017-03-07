@@ -1,0 +1,86 @@
+#!/usr/bin/env python
+import time
+import json
+import argparse
+import requests
+import io
+
+import sys
+from os.path import abspath, expanduser
+
+
+def parse_command_line_arguments(args):
+    parser = argparse.ArgumentParser(description='Manage GitHub deploy keys')
+    subparsers = parser.add_subparsers()
+    parser.add_argument(
+        '-t', '--token', required=True,
+        help='Github token used to authenticate the client')
+
+    # Add the add subcommand
+    subparser = subparsers.add_parser('add', help='Manage Github deploy keys')
+    subparser.set_defaults(command='add')
+    subparser.add_argument(
+        '-p', '--project-name', metavar='PROJECT', required=True,
+        help='Name of the project')
+    subparser.add_argument(
+        '-k', '--key-title', required=True,
+        help='Title of the key you want to upload')
+    subparser.add_argument(
+        '-f', '--key-file', required=True,
+        help='A valid SSH key file')
+
+    return parser.parse_args(args)
+
+
+def main(args=sys.argv[1:]):
+    options = parse_command_line_arguments(args)
+    url = 'https://api.github.com/repos/bellyfeel/{0}/keys'.format(
+        options.project_name)
+
+    def key_is_there(options):
+        response_get = requests.get(url, auth=(options.token, 'x-oauth-basic'))
+        for key in response_get.json():
+            if options.key_title in key['title']:
+                return key
+
+        return {}
+
+    def delete_key(project_name, key_id):
+        delete_url = '/'.join([url, str(key_id)])
+        response = requests.delete(
+            delete_url,
+            auth=(options.token, 'x-oauth-basic'),
+        )
+        if response.status_code > 300:
+            print "Failed to delete key", project_name, response.content
+        else:
+            print "deleted previous key", project_name, key_id
+
+    def add_key(options):
+        existing = key_is_there(options)
+        if existing:
+            delete_key(options.project_name, existing['id'])
+
+        key = io.open(abspath(expanduser(options.key_file))).read()
+        payload = json.dumps({
+            'title': options.key_title,
+            'key': key
+        })
+        response_post = requests.post(
+            url,
+            auth=(options.token, 'x-oauth-basic'),
+            data=payload,
+        )
+
+        if response_post.status_code > 300:
+            raise SystemExit(response_post.content)
+
+        time.sleep(10)
+
+    {
+        'add': add_key,
+    }[options.command](options)
+
+
+if __name__ == '__main__':
+    main()

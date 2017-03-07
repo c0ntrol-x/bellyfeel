@@ -1,0 +1,58 @@
+---
+# Handlers for Nginx notifications.
+
+- name: stop nginx
+  service: >
+    name=nginx
+    state=stopped
+
+- name: start nginx
+  service: >
+    name=nginx
+    state=started
+    enabled=yes
+
+- name: restart nginx
+  service: >
+    name=nginx
+    state=restarted
+    enabled=yes
+
+# handlers for the gunicorn server at port [tutnkapp_http_port](4000)
+
+- name: stop bellyfeel-app
+  service: >
+    name=bellyfeel-app
+    state=stopped
+
+- name: start bellyfeel-app
+  service: >
+    name=bellyfeel-app
+    state=started
+    enabled=yes
+
+- name: restart bellyfeel-app
+  service: >
+    name=bellyfeel-app
+    state=restarted
+    enabled=yes
+
+
+# handlers for the tutnk-mail server (port 25)
+
+- name: stop tutnk-mail
+  service: >
+    name=tutnk-mail
+    state=stopped
+
+- name: start tutnk-mail
+  service: >
+    name=tutnk-mail
+    state=started
+    enabled=yes
+
+- name: restart tutnk-mail
+  service: >
+    name=tutnk-mail
+    state=restarted
+    enabled=yes

@@ -1,0 +1,90 @@
+# - name: add HAProxy ppa
+#   command: add-apt-repository -y ppa:vbernat/haproxy-1.5
+
+#     creates=/etc/apt/sources.list.d/vbernat-haproxy-1_5-trusty.list
+#   tags: nginx
+
+# - name: ensure that HAProxy is installed
+#   apt: name={{ item }} state=installed update_cache=yes
+#   with_items:
+#     - haproxy
+
+- name: install nginx config file
+  template: src=nginx.conf dest=/etc/nginx/sites-available/{{ application_name }}.conf
+            owner=root group=root mode=644
+  tags:
+    - bellyfeelapi
+    - ssl
+    - nginx
+    - refresh
+
+- name: ensure no previous link for nginx
+  file: path=/etc/nginx/sites-enabled/{{ application_name }}.conf state=absent
+  tags:
+    - bellyfeelapi
+    - ssl
+    - nginx
+    - refresh
+
+
+- name: enable nginx config file
+  file: src=/etc/nginx/sites-available/{{ application_name }}.conf
+        dest=/etc/nginx/sites-enabled/{{ application_name }}.conf
+        state=link
+  tags:
+    - ssl
+    - nginx
+    - bellyfeelapi
+    - refresh
+
+
+# - name: install haproxy config file
+#   template: src=haproxy.cfg dest=/etc/haproxy/haproxy.cfg
+#             owner=root group=root mode=644
+#   tags:
+#     - haproxy
+
+# - name: enable haproxy management by the init script
+#   template: src=haproxy.defaults dest=/etc/default/haproxy
+#             owner=root group=root mode=644
+#   tags:
+#     - haproxy
+
+- include: backup.yml
+
+- include: monitoring.yml
+
+- name: place copper egg graceful shutdown script
+  template: src=copper-egg-shutdown.sh dest="/srv/copper-egg-graceful-shutdown.sh"
+    owner=root group=root mode=0666
+  tags:
+    - copperegg
+
+- name: enable graceful shutdown script
+  shell: sysctl -w kernel.poweroff_cmd=/srv/copper-egg-graceful-shutdown.sh
+  tags:
+    - copperegg
+
+- include: ssl_certs.yml
+
+- name: setup log rotation
+  template: src=logrotate.conf dest="/etc/logrotate.d/{{ application_name }}"
+    owner=root group=root mode=0644
+
+  tags:
+    - logging
+
+
+- name: ensure nginx is running
+  shell: service nginx restart
+  tags:
+    - bellyfeelapi
+    - ssl
+    - nginx
+    - git
+    - refresh
+
+- name: check the machines health
+  uri: url="https://{{ dns_bellyfeelapi }}/api/hc"
+       method=GET
+       status_code=200

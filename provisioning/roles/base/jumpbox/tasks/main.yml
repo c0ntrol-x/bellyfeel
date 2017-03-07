@@ -1,0 +1,42 @@
+- name: install os requirements
+  yum: name={{ item }} state=installed
+  with_items:
+    - vim
+    - htop
+    - iotop
+
+- name: install copper egg
+  shell: "curl -sk http://{{ copper_egg_token }}@api.copperegg.com/rc.sh | sh"
+
+- name: place copper egg graceful shutdown script
+  template: src=copper-egg-shutdown.sh dest="/srv/copper-egg-graceful-shutdown.sh"
+    owner=root group=root mode=0666
+  tags:
+    - copperegg
+
+- name: enable graceful shutdown script
+  shell: sysctl -w kernel.poweroff_cmd=/srv/copper-egg-graceful-shutdown.sh
+  tags:
+    - copperegg
+
+# - name: prepare authorized keys file
+#   shell: "echo >> /home/ec2-user/.ssh/authorized_keys"
+
+# - name: place ssh keys for each extra user
+#   shell: "curl https://github.com/{{ item.value }}.keys >> /home/ec2-user/.ssh/authorized_keys"
+#   with_dict: extra_users
+#   tags:
+#     - user
+#   when: "'{{ environment_name }}' != 'production'"
+
+# - name: place ssh keys for each production user
+#   shell: "curl https://github.com/{{ item.value }}.keys >> /home/ec2-user/.ssh/authorized_keys"
+#   with_dict: production_users
+#   tags:
+#     - user
+#   when: "'{{ environment_name }}' == 'production'"
+
+# - name: ensure right permissions on authorized_keys file
+#   file: path="/home/ec2-user/.ssh/authorized_keys" owner="ec2-user" group="ec2-user" mode=0660
+#   tags:
+#     - user

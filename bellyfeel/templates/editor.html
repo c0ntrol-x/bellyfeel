@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block nav %}
+<nav class="{% block css_class_navbar %}navbar navbar-inverse{% endblock %}">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/editor">{% block brand %}/editor{% endblock %}</a>
+    </div>
+    <div id="navbar" class="collapse navbar-collapse">
+      <ul class="nav navbar-nav">
+        {% block navbar_items %}
+        <li><a href="/editor">new</a></li>
+        {% endblock %}
+      </ul>
+      </ul>
+    </div><!-- /.nav-collapse -->
+  </div>
+</nav>
+
+{% endblock %}
+{# endblock nav #}
+
+{% block body_bottom %}
+<!-- Main Quill library -->
+<script src="/dist/quill/quill.js"></script>
+<script src="/dist/quill/quill.min.js"></script>
+
+<!-- Theme included stylesheets -->
+<link href="/dist/quill/quill.snow.css" rel="stylesheet">
+<link href="/dist/quill/quill.bubble.css" rel="stylesheet">
+
+<!-- Core build with no theme, formatting, non-essential modules -->
+<link href="/dist/quill/quill.core.css" rel="stylesheet">
+<script src="/dist/quill/quill.core.js"></script>
+<script>
+ var quill = new Quill('#editor', {
+   placeholder: 'The truth...',
+   debug: 'info',
+   toolbar: {
+     container: '#toolbar',  // Selector for toolbar container
+     handlers: {}
+   },
+   syntax: true,
+   modules: {
+     toolbar: '#toolbar'
+   }
+   /* readOnly: true,*/
+   /* theme: 'snow'*/
+ });
+ quill.on('text-change', function(delta, oldDelta, source) {
+   if (source == 'user') {
+     quill.getContents().ops[0].insert
+     jQuery.ajax({
+       type: 'POST',
+       url: '{{ url_for("editor_save", path=post.path) }}',
+       data: '{{ json.dumps(post) }}',
+       /* success: function(data) { alert('data: ' + data); },*/
+       contentType: "application/json",
+       dataType: 'json',
+
+     });
+   }
+ });
+</script>
+{% endblock %}
+{% block container %}
+<div id="toolbar"></div>
+<div id="editor"></div>
+{% endblock %}

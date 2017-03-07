@@ -1,0 +1,13 @@
+---
+
+venv_path: /srv/venv
+src_path: /srv/src
+frontend_static_path: /srv/src/bellyfeel/static
+tutnkapp_http_port: 4000
+gunicorn_timeout: 10
+
+nginx_domains:
+  - fqdn: private.bellyfeel.audio
+    ssl:
+      key: |
+        -- SSL PRIVATE KEY ---

@@ -1,0 +1,17 @@
+Flask-SQLAlchemy==2.1
+ansible==2.2.0.0
+gunicorn==19.4.5
+html5lib==0.999999999
+htmlmin==0.1.10
+inbox.py==0.0.6
+ipython==4.1.2
+mysql-python==1.2.5
+p4rr0t007==0.1.17
+passlib==1.6.5
+plant==0.1.2
+pyotp==2.2.4
+qrcode==5.3
+repocket==0.1.26
+requests==2.9.1
+python-memcached==1.58
+alembic==0.9.1

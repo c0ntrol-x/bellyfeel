@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block css_class_navbar %}navbar navbar-inverse{% endblock %}
+{% block container %}
+<div class="container">
+    <div class="row">
+      <div class="col-md-3">
+      </div>
+      <div class="col-md-6">
+        <h3>fil3z tAkE0Ut</h3>
+        <center>
+          <div class="thumbnail">
+            <h3>{{ info.filename }}</h3>
+            <img src="{{ url_for('qrcode_private_file', uuid=info.uuid) }}" />
+            <div class="caption-full">
+              <p>{{ "{:2g}".format(info.size / 1024) }}kb</p>
+              <p><a class="btn btn-large btn-success" href="{{ url_for('serve_private_file', uuid=info.uuid) }}">{{ info.filename }}</a></p>
+            </div>
+          </div>
+        </center>
+      </div>
+      <div class="col-md-3">
+      </div>
+    </div>
+</div>
+{% endblock %}
+{% block body_bottom %}{% endblock %}
+
+{% block navbar_items %}
+<li><a href="{{ url_for('serve_private_file', uuid=info.uuid) }}/">download</a></li>
+<li><a href="{{ url_for('show_private_file', uuid=info.uuid) }}/">share</a></li>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block brand %}webmail{% endblock %}
+{% block title %}webmail{% endblock %}
+{% block css_class_navbar %}navbar navbar-inverse{% endblock %}
+{% block body_trunk %}
+<div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <p class="lead"><strong>TO</strong>: {{ message.to }}</p>
+        <p class="lead"><strong>FROM</strong>: {{ message.from }}</p>
+        <p class="lead"><strong>SUBJECT</strong>: {{ message.subject }}</p>
+      </div>
+
+      {% if message.parts %}
+      <div class="col-md-12">
+          {% for part in message.parts %}
+          {% if part.content_type == 'text/html' %}
+          {{ part.body|safe }}
+          {% endif %}
+          {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+</div>
+{% endblock %}
+{% block body_bottom %}{% endblock %}
+
+{% block navbar_items %}
+<li><a href="/webmail">Home</a></li>
+<li><a href="/webmail/inbox">Inbox</a></li>
+<li><a href="/webmail/archive">Archive</a></li>
+<li><a href="/webmail/sent">Sent Mail</a></li>
+{% endblock %}
+
+
+{% block navbar_right %}
+{% endblock %}
