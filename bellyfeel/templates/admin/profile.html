@@ -1,0 +1,21 @@
+{% extends "admin/base.html" %}
+{% block container %}
+<div class="row">
+  <div class="col-md-4"></div>
+  <div class="col-md-4 col-sm-12">
+    <form class="form-signin" action="{{ url_for('admin_change_password_post') }}" method="post" enctype="multipart/form-data">
+      <h3 class="form-signin-heading">change your password</h3>
+      <p><label for="currentPassword" class="sr-only">Current Password</label><input name="current_password" type="password" id="currentPassword" class="form-control" placeholder="Password" required></p>
+      <p><label for="newPassword" class="sr-only">New Password</label><input name="new_password" type="password" id="newPassword" class="form-control" placeholder="Password" required></p>
+      <p><label for="repeatNewPassword" class="sr-only">Repeat New Password</label><input name="repeat_new_password" type="password" id="repeatNewPassword" class="form-control" placeholder="Password" required></p>
+      <em>minimum of 12 characters</em>
+      <br />
+      <p>
+        <button class="btn btn-sm btn-warning btn-block" type="submit">Change Password</button>
+      </p>
+    </form>
+  </div>
+  <div class="col-md-4"></div>
+
+</div>
+{% endblock %}

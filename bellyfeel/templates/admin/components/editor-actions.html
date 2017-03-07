@@ -1,0 +1,46 @@
+<form action= method="post" enctype="multipart/form-data">
+<nav class="navbar " role="navigation">
+
+  <ul class="nav navbar-left top-nav">
+    <li>
+      <p class="lead editor-control">Title:</p>
+    </li>
+    <li>
+      <input id="field-title" type="text" style="width: 300px" class="form-control editor-control lead" name="title" placeholder="@{{ user.username.title() }}'s Unsaved Title #1" {% if content %} value="{{ content.title }}"{% endif %} />
+    </li>
+    <li>
+      <p class="lead editor-control">Content-Type:</p>
+    </li>
+    <li>
+      <select id="field-type" name="content-type" class="form-control editor-control lead">
+        <option>Post</option>
+        <option>Note</option>
+        <option>Auto-Reminder</option>
+        <option>Task List</option>
+      </select>
+    </li>
+    <li>
+      <p class="lead editor-control">Self-Destruct at:</p>
+    </li>
+    <li>
+      <input id="field-self-destruct-date" name="self-destruct-date" type="datetime" placeholder="2017/03/27 11:11:11" class="form-control editor-control lead"/>
+    </li>
+    <li>
+      <a id="do-save-revision" href="#" class="lead btn btn-link lead editor-control"><i class="fa fa-fw fa-save"></i>Save Revision</a>
+    </li>
+    <li>
+      <a href="#" class="lead btn btn-link lead editor-control"><i class="fa fa-fw fa-check"></i>Request Review</a>
+    </li>
+    <li>
+      <a href="#" class="lead btn btn-link lead editor-control"><i class="fa fa-fw fa-send"></i>Send as Message</a>
+    </li>
+    {% if content %}
+    <li>
+      <a  href="{{ url_for('admin_delete_content', id=content.id) }}" class="lead btn btn-link lead editor-control"><i class="fa fa-fw fa-trash"></i>Delete</a>
+    </li>
+    {% endif %}
+
+  </ul>
+
+</nav>
+</form>

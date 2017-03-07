@@ -1,0 +1,7 @@
+node_modules/
+*.woff2
+*.svg
+*.ttf
+*.eot
+*.woff
+dist/*

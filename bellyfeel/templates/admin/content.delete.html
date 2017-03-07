@@ -1,0 +1,28 @@
+{% extends "admin/base.html" %}
+{% block container %}
+<form action="{{ url_for('admin_delete_content', id=content.id) }}" method="post" enctype="multipart/form-data">
+
+<div class="row">
+  <div class="col-md-3"></div>
+    <div class="col-md-6">
+    <div class="alert alert-danger jumbotron">
+      <h3>Are you sure you want to delete the "{{ content.type }}" {{ content.title }} by @{{ content.author.username }}?</h3>
+
+      <p class="lead">
+      <textarea class="col-sm-12" rows="8" style="font-family: Menlo, Monaco, monospace; font-size:18px;">{{ content.text }}</textarea>
+      </p>
+
+      <center>
+        <p class="lead">
+
+      <button type="submit" name="yes" class="btn btn-large btn-primary">Yes, delete it!</button>
+
+      <a href="{{ url_for('admin_edit_content_preferred', id=content.id) }}" class="btn btn-large btn-default">No, ooops!</a>
+        </p>
+      </center>
+    </div>
+  </div>
+  <div class="col-md-3"></div>
+</div>
+</form>
+{% endblock %}

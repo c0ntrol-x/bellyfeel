@@ -10,7 +10,7 @@ from p4rr0t007.lib.core import get_logger
 
 node = Node(__file__)
 server = Application(node, settings_module='bellyfeel.settings')
-logger = get_logger('bellyfeel')
+logger = get_logger()
 
 
 __all__ = [

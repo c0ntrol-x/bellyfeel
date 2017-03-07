@@ -1,4 +1,19 @@
 ---
+
+# handlers for bellyfeel permissions
+- name: nginx permissions to bellyfeel assets
+  file:
+    path: "{{ item }}"
+    owner: www-data
+    group: www-data
+    mode: 0755
+    state: directory
+  notify:
+    - restart nginx
+  with_items:
+    - "{{ bellyfeel_www_root }}"
+    - "{{ bellyfeel_www_static_dir }}"
+
 # Handlers for Nginx notifications.
 
 - name: stop nginx
@@ -18,7 +33,7 @@
     state=restarted
     enabled=yes
 
-# handlers for the gunicorn server at port [tutnkapp_http_port](4000)
+# handlers for the gunicorn server at port [bllyflapp_http_port](4000)
 
 - name: stop bellyfeel-app
   service: >

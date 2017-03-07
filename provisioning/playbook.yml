@@ -4,6 +4,10 @@
 
   user: root
 
+  # vars:
+  #   # force drop the mysql database
+  #   bellyfeel_mysql_force_drop_db: yes
+
   vars_files:
     - "bellyfeel-vault.yml"
 
@@ -11,21 +15,21 @@
     - debug: var=ansible_all_ipv4_addresses
 
   roles:
-    # # automatic mount droplet volumes and update fstab
-    # # - digitalocean
+    # automatic mount droplet volumes and update fstab
+    # - digitalocean
 
-    # - base/enable-standard-cronjobs
-    # - base/system-updates
-    # - base/nginx
-    # - base/ulimit
+    - base/enable-standard-cronjobs
+    - base/system-updates
+    - base/ulimit
 
-    # - security/system-hardening
-    # - security/firewall
+    - security/system-hardening
+    - security/firewall
 
-    # - servers/mysql-db
-    # - servers/redis
-    # - servers/memcached
-    # - servers/onion
+    - servers/nginx
+    - servers/mysql-db
+    - servers/redis
+    - servers/memcached
+    - servers/onion
 
-    # - apps/ssl
+    - apps/ssl
     - apps/web

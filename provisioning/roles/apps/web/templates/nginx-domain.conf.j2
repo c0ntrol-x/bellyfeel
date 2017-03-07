@@ -10,13 +10,13 @@ server {
     listen 443 default ssl;
     root /dev/null;
 
-    server_name {{ root_domain }};
-    server_name api.{{ root_domain }};
+    server_name {{ bellyfeel_root_hostname }};
+    server_name api.{{ bellyfeel_root_hostname }};
 
     # limit_req zone=default burst=16 nodelay;
 
-    access_log /var/log/nginx/{{ root_domain }}.access.log;
-    error_log /var/log/nginx/{{ root_domain }}.error.log;
+    access_log /var/log/nginx/{{ bellyfeel_root_hostname }}.access.log;
+    error_log /var/log/nginx/{{ bellyfeel_root_hostname }}.error.log;
 
     {% include "nginx.server.ssl.j2" %}
     keepalive_requests 200;
@@ -27,12 +27,12 @@ server {
 
     location / {
         # checks for static file, if not found proxy to app
-        try_files $uri @tutnkapp;
+        try_files $uri @bllyflapp;
     }
 
-    location @tutnkapp {
+    location @bllyflapp {
         root /dev/null;
-        proxy_pass                      http://127.0.0.1:{{ tutnkapp_http_port }};
+        proxy_pass                      http://127.0.0.1:{{ bllyflapp_http_port }};
         proxy_set_header                X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header                X-Forwarded-Proto https;
         proxy_set_header                Host $http_host;
@@ -44,13 +44,13 @@ server {
     }
 
     # location ~ ^/s/(.+\.(?:gif|jpe?g|png))$ {
-    #     alias /srv/src/static/dist/favicon.ico;
+    #     alias {{ bellyfeel_src_dir }}/static/dist/favicon.ico;
     # }
     location /dist/ {
-        alias /srv/src/bellyfeel/static/dist/;
+        alias {{ bellyfeel_src_dir }}/bellyfeel/static/dist/;
     }
     location /favicon.ico {
-        alias /srv/src/static/favicon.ico;
+        alias {{ bellyfeel_src_dir }}/static/favicon.ico;
     }
 }
 
@@ -58,12 +58,12 @@ server {
     listen 443 ssl;
     root /srv/private;
 
-    server_name private.{{ root_domain }};
+    server_name private.{{ bellyfeel_root_hostname }};
 
     # limit_req zone=default burst=16 nodelay;
 
-    access_log /var/log/nginx/private.{{ root_domain }}.access.log;
-    error_log /var/log/nginx/private.{{ root_domain }}.error.log;
+    access_log /var/log/nginx/private.{{ bellyfeel_root_hostname }}.access.log;
+    error_log /var/log/nginx/private.{{ bellyfeel_root_hostname }}.error.log;
 
     {% include "nginx.server.ssl.j2" %}
 
@@ -80,13 +80,13 @@ server {
     listen 443 ssl;
     root /srv/private;
 
-    server_name blog.{{ root_domain }};
-    server_name git.{{ root_domain }};
+    server_name blog.{{ bellyfeel_root_hostname }};
+    server_name git.{{ bellyfeel_root_hostname }};
 
     # limit_req zone=default burst=16 nodelay;
 
-    access_log /var/log/nginx/private.{{ root_domain }}.access.log;
-    error_log /var/log/nginx/private.{{ root_domain }}.error.log;
+    access_log /var/log/nginx/private.{{ bellyfeel_root_hostname }}.access.log;
+    error_log /var/log/nginx/private.{{ bellyfeel_root_hostname }}.error.log;
 
     {% include "nginx.server.ssl.j2" %}
 
@@ -96,19 +96,19 @@ server {
 
 
     location / {
-        root /srv/src/blog/blog/html;
+        root {{ bellyfeel_src_dir }}/blog/blog/html;
     }
 }
 
 server {
     listen 80 default;
     root /dev/null;
-    server_name {{ root_domain }};
-    server_name api.{{ root_domain }};
-    server_name blog.{{ root_domain }};
-    server_name git.{{ root_domain }};
-    server_name private.{{ root_domain }};
-    server_name mail.{{ root_domain }};
+    server_name {{ bellyfeel_root_hostname }};
+    server_name api.{{ bellyfeel_root_hostname }};
+    server_name blog.{{ bellyfeel_root_hostname }};
+    server_name git.{{ bellyfeel_root_hostname }};
+    server_name private.{{ bellyfeel_root_hostname }};
+    server_name mail.{{ bellyfeel_root_hostname }};
 
     location / {
         return 301 https://$host$request_uri;

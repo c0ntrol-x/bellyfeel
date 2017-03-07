@@ -1,0 +1,106 @@
+{% extends "admin/base.html" %}
+
+{% block head %}
+<link href="{{ url_for('static', filename='styles/monokai-sublime.css') }}" rel="stylesheet">
+<link href="{{ url_for('static', filename='quill/quill.core.css') }}" rel="stylesheet">
+<link href="{{ url_for('static', filename='quill/quill.snow.css') }}" rel="stylesheet">
+
+{% endblock %}
+
+{% block body_bottom %}
+<script type="text/javascript" src="{{ url_for('static', filename='lib/highlight.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='quill/quill.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='quill/quill.core.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='quill/quill.min.js') }}"></script>
+<script>
+ jQuery(function(){
+   var quill = new Quill('#tranquill-editor', {
+     placeholder: 'type your content here...',
+     debug: 'warn',
+     toolbar: {
+       container: '#tranquill-bar',
+     },
+     syntax: true,
+     modules: {
+       syntax: true,
+       toolbar: '#tranquill-bar',
+     },
+     theme: 'snow',
+   });
+   quill.keyboard.addBinding({ key: 'B', shortKey: true }, function(range, context) {
+     this.quill.formatText(range, 'bold', true);
+   });
+   quill.keyboard.addBinding({ key: 'I', shortKey: true }, function(range, context) {
+     this.quill.formatText(range, 'italic', true);
+   });
+   {% if content %}
+   quill.clipboard.dangerouslyPasteHTML(0, '{{ content.text|safe }}');
+   {% else %}
+   quill.clipboard.dangerouslyPasteHTML(0, '<h1>Howdy @{{ user.username }}!</h1><br /><p>Always remember: <b><em>"Words are swords, and pencils are utensils!"</em></b></p>');
+   {% endif %}
+   quill.on('text-change', function(delta, oldDelta, source) {
+     if (source == 'user') {
+       console.log(quill.getContents().ops[0].insert);
+     }
+   });
+ });
+</script>
+{% endblock %}
+{% block after_nav %}{% include "admin/components/editor-actions.html" %}
+
+{% endblock %}
+
+{% block page_wrapper %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-12 col-sm-12">
+      <div id="tranquill-bar">
+        <span class="ql-formats">
+          <select class="ql-font"></select>
+          <select class="ql-size"></select>
+        </span>
+        <span class="ql-formats">
+          <button class="ql-bold"></button>
+          <button class="ql-italic"></button>
+          <button class="ql-underline"></button>
+          <button class="ql-strike"></button>
+        </span>
+        <span class="ql-formats">
+          <select class="ql-color"></select>
+          <select class="ql-background"></select>
+        </span>
+        <span class="ql-formats">
+          <button class="ql-script" value="sub"></button>
+          <button class="ql-script" value="super"></button>
+        </span>
+        <span class="ql-formats">
+          <button class="ql-header" value="1"></button>
+          <button class="ql-header" value="2"></button>
+          <button class="ql-blockquote"></button>
+          <button class="ql-code-block"></button>
+        </span>
+        <span class="ql-formats">
+          <button class="ql-list" value="ordered"></button>
+          <button class="ql-list" value="bullet"></button>
+          <button class="ql-indent" value="-1"></button>
+          <button class="ql-indent" value="+1"></button>
+        </span>
+        <span class="ql-formats">
+          <button class="ql-direction" value="rtl"></button>
+          <select class="ql-align"></select>
+        </span>
+        <span class="ql-formats">
+          <button class="ql-link"></button>
+          <button class="ql-image"></button>
+          <button class="ql-video"></button>
+        </span>
+        <span class="ql-formats">
+          <button class="ql-clean"></button>
+        </span>
+      </div>
+
+      <div id="tranquill-editor" class=" col-md-12 col-sm-12"></div>
+    </div>
+  </div>
+</div>
+{% endblock %}

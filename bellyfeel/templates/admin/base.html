@@ -4,9 +4,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     {% block css %}
-    <link href="{{ url_for('static', filename='font-awesome/css/font-awesome.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/font-awesome.min.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/sb-admin.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/admin.css') }}" rel="stylesheet">
     <!-- <link href="{{ url_for('static', filename='swatch/paper/bootstrap.min.css') }}" rel="stylesheet"> -->
     {% endblock %}
     <title>{% block title %}bellyfeel.io{% endblock %}</title>
@@ -16,12 +17,107 @@
   <body>
     {% block body_top %}{% endblock %}{# body_top #}
     {% block body %}
+    <div id="wrapper">
+      {% include "admin/components/top-nav.html" %}
+      {% block after_nav %}{% endblock %}
+      <div id="page-wrapper">
+        {% block page_wrapper %}
+        <div class="container">
+          {% block container %}
+          {% endblock %}
+        </div>
+        {% endblock %}
+      </div>
+    </div>
     {% endblock %}{# body #}
     {% block script %}
     <script type="text/javascript" src="{{ url_for('static', filename='js/underscore-min.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='quill/quill.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/vue.min.js') }}"></script>
+    <script>
+     function bellyfeel_create_content(data, success_callback){
+       var targetUrl = "{{ url_for('api_content_create') }}";
+       $.ajax({
+         type: 'POST',
+         url: targetUrl,
+         data: JSON.stringify(data),
+         success: success_callback,
+         contentType: "application/json",
+         dataType: 'json'
+       });
+     }
+     function bellyfeel_edit_content(id, data, success_callback){
+       var templateUrl = "{{ url_for('api_content_edit', id=0) }}";
+       $.ajax({
+         type: 'POST',
+         url: templateUrl.replace('0', id),
+         data: JSON.stringify(data),
+         success: success_callback,
+         contentType: "application/json",
+         dataType: 'json'
+       });
+     }
+
+     function bellyfeel_delete_content(id, success_callback) {
+       var templateUrl = "{{ url_for('api_content_edit', id=0) }}";
+       $.ajax({
+         type: 'DELETE',
+         url: templateUrl.replace('0', id),
+         success: success_callback,
+         contentType: "application/json",
+         dataType: 'json'
+       });
+     }
+     function redirect_on_success(data) {
+       location.href = data['url']
+     }
+
+     jQuery(function(){
+
+       /*
+        *        $(".action-edit-content").on('click', function(e){
+        *          e.preventDefault();
+        *          var match = /[#](\w+)/.exec($(this).attr("href"));
+        *          if (match == null) {
+        *            return false;
+        *          }
+        *
+        *        });
+        *
+        *        $(".action-delete-content").on('click', function(e){
+        *          e.preventDefault();
+        *        });
+        * */
+       $("#do-save-revision").on('click', function(e){
+         e.preventDefault();
+         var data = {};
+         data['title'] = $("#field-title").val();
+         data['type'] = $("#field-type").val();
+         data['self_destruct_date'] = $("#field-self-destruct-date").val();
+
+         var markdown_text = $("#compiled-markdown").html();
+         var quill_text = $("#tranquill-editor .ql-editor").html();
+         data['markdown_text'] = markdown_text;
+         data['quill_text'] = quill_text;
+
+         {% if content %}
+         bellyfeel_edit_content({{ content.id }}, data, redirect_on_success);
+         {% else %}
+         bellyfeel_create_content(data, redirect_on_success);
+         {% endif %}
+       });
+
+       $("#do-delete-revision").on('click', function(e){
+         e.preventDefault();
+         {% if content %}
+         bellyfeel_delete_content({{ content.id }}, redirect_on_success);
+         {% else %}
+         location.href = '{{ url_for("admin_dashboard") }}';
+         {% endif %}
+       });
+     });
+    </script>
     {% endblock %}{# script #}
     {% block body_bottom %}{% endblock %}{# body_top #}
   </body>

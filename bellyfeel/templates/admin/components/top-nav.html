@@ -1,0 +1,144 @@
+<!-- Navigation -->
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+  <!-- Brand and toggle get grouped for better mobile display -->
+  <div class="navbar-header">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+    <a class="navbar-brand" href="{{ url_for('admin_dashboard') }}"><i class="fa fa-cut"></i>.world</a>
+  </div>
+  <!-- Top Menu Items -->
+  <ul class="nav navbar-right top-nav">
+    {% if user.has_unread_messages() %}
+    <li class="dropdown">
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-envelope"></i> <b class="caret"></b></a>
+      <ul class="dropdown-menu message-dropdown">
+        {% for message in user.get_unread_messages() %}
+        <li class="message-preview">
+          <a href="{{ message.href }}">
+            <div class="media">
+              <span class="pull-left">
+                <img class="media-object" width="48" height="48" src="{{ message.sender_image_path }}">
+              </span>
+              <div class="media-body">
+                <h5 class="media-heading">from <strong>@{{ message.sender }}</strong>
+                </h5>
+                <p class="small text-muted"><i class="fa fa-clock-o"></i> {{ message.when }}</p>
+                <p>{{ message.preview }}</p>
+              </div>
+            </div>
+          </a>
+        </li>
+        {% endfor %}
+        <li class="message-footer">
+          <a href="#">Read All New Messages</a>
+        </li>
+      </ul>
+      {% endif %}
+      {% if user and user.has_notifications() %}
+      <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bell"></i> <b class="caret"></b></a>
+        <ul class="dropdown-menu alert-dropdown">
+          {% for notification in user.get_notifications() %}
+          <li>
+            <a href="{{ notification.href }}">{% if notification.badge %}<span class="label label-{% if notification.level %}{{ notification.level }}{% else %}primary{% endif %}">{{ notification.badge }} </span>&nbsp;{% endif %}{{ notification.message }}</a>
+          </li>
+          {% endfor %}
+          <li class="divider"></li>
+          <li>
+            <a href="#">View All</a>
+          </li>
+        </ul>
+      </li>
+      {% endif %}
+      {% if user and user.is_admin %}
+      <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> {{ user.username }} <b class="caret"></b></a>
+        <ul class="dropdown-menu">
+          <li>
+          <a href="{{ url_for('admin_profile') }}"><i class="fa fa-fw fa-user"></i> Profile</a>
+          </li>
+          <li>
+            <a href="{{ url_for('admin_mail') }}"><i class="fa fa-fw fa-envelope"></i> Messages</a>
+          </li>
+          <li>
+            <a href="{{ url_for('admin_change_password') }}"><i class="fa fa-fw fa-key"></i> Password</a>
+          </li>
+          <li class="divider"></li>
+          <li>
+            <a href="{{ url_for('admin_logout') }}"><i class="fa fa-fw fa-power-off"></i> Logout</a>
+          </li>
+
+        </ul>
+      </li>
+      {% endif %}
+  </ul>
+  <!-- Sidebar Menu Items - These collapse to the responsive navigation menu on small screens -->
+  <div class="collapse navbar-collapse navbar-ex1-collapse">
+    <ul class="nav navbar-nav side-nav">
+      <li>
+        <a href="{{ url_for('admin_dashboard') }}"><i class="fa fa-fw fa-dashboard"></i> Dashboard</a>
+      </li>
+      <li class="divider"></li>
+      <li class="dropdown">
+        <a href="javascript:;" data-toggle="collapse" data-target="#create"><i class="fa fa-fw fa-file"></i> Create Content<i class="fa fa-fw fa-caret-down"></i></a>
+        <ul id="create" class="collapse">
+          <li>
+            <a href="{{ url_for('create_content_quill') }}"><i class="fa fa-fw fa-pencil"></i> Visual Editor</a>
+          </li>
+          <li>
+            <a href="{{ url_for('create_content_markdown') }}"><i class="fa fa-fw fa-file-code-o"></i> Markdown Editor</a>
+          </li>
+        </ul>
+      </li>
+      <li><a href="{{ url_for('admin_tag_list') }}"><i class="fa fa-fw fa-hashtag"></i> My Tags</a></li>
+      <li><a href="{{ url_for('admin_comment_list') }}"><i class="fa fa-fw fa-comments"></i> My Comments</a></li>
+      <li><a href="{{ url_for('admin_collaboration_list') }}"><i class="fa fa-fw fa-users"></i> My Collaborations</a></li>
+
+      {#<li>
+        <a href="{{ url_for('admin_outliner') }}"><i class="fa fa-fw fa-indent"></i> Outliner</a>
+      </li>#}
+      <li>
+        <a href="javascript:;" data-toggle="collapse" data-target="#archive"><i class="fa fa-fw fa-archive"></i> Archive <i class="fa fa-fw fa-caret-down"></i></a>
+        <ul id="archive" class="collapse">
+          <li>
+            <a href="{{ url_for('admin_draft_list') }}"><i class="fa fa-fw fa-file-text-o"></i> Drafts</a>
+          </li>
+          <li>
+            <a href="{{ url_for('admin_note_list') }}"><i class="fa fa-fw fa-sticky-note"></i> Notes</a>
+          </li>
+          <li>
+            <a href="{{ url_for('admin_published_list') }}"><i class="fa fa-fw fa-clock-o"></i> Published</a>
+          </li>
+          <li>
+            <a href="{{ url_for('admin_expired_list') }}"><i class="fa fa-fw fa-hourglass-end"></i> Auto-Expired</a>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <a href="javascript:;" data-toggle="collapse" data-target="#briefcase"><i class="fa fa-fw fa-briefcase"></i> Briefcase <i class="fa fa-fw fa-caret-down"></i></a>
+        <ul id="briefcase" class="collapse">
+          <li>
+            <a href="{{ url_for('admin_draft_list') }}"><i class="fa fa-fw fa-file-text-o"></i> Drafts</a>
+          </li>
+          <li>
+            <a href="{{ url_for('admin_note_list') }}"><i class="fa fa-fw fa-sticky-note"></i> Notes</a>
+          </li>
+          <li>
+            <a href="{{ url_for('admin_published_list') }}"><i class="fa fa-fw fa-clock-o"></i> Published</a>
+          </li>
+          <li>
+            <a href="{{ url_for('admin_expired_list') }}"><i class="fa fa-fw fa-hourglass-end"></i> Auto-Expired</a>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <a href="{{ url_for('admin_dashboard') }}"><i class="fa fa-fw fa-support"></i> Documentation</a>
+      </li>
+    </ul>
+  </div>
+  <!-- /.navbar-collapse -->
+</nav>

@@ -1,0 +1,35 @@
+{% extends "admin/base.html" %}
+{% block container %}
+<div class="row">
+  <div class="col-md-4"></div>
+  <div class="col-md-4 col-sm-12">
+    <form class="form-signin" action="{{ url_for('admin_change_password_post') }}" method="post" enctype="multipart/form-data">
+      <h3 class="form-signin-heading">Setup two-factor authentication</h3>
+      <p class="lead">
+        This adds an extra layer of security to access your account.
+        You can use any TOTP manager of your choice.
+      </p>
+      <p>Here is a list of apps that you can choose from, in case you're unsure:</p>
+      <ol>
+        <li><a href="https://authy.com/download">Authy</a></li>
+        <li><a href="https://google.com/authenticator">Google Authenticator</a></li>
+      </ol>
+
+      <hr />
+      <p>
+        <img src="{{ url_for('admin_render_temporary_totp_token') }}" />
+      </p>
+      <p><label for="currentPassword" class="sr-only">Current Password</label><input name="current_password" type="password" id="currentPassword" class="form-control" placeholder="Password" required></p>
+      <p><label for="newPassword" class="sr-only">New Password</label><input name="new_password" type="password" id="newPassword" class="form-control" placeholder="Password" required></p>
+      <p><label for="repeatNewPassword" class="sr-only">Repeat New Password</label><input name="repeat_new_password" type="password" id="repeatNewPassword" class="form-control" placeholder="Password" required></p>
+      <em>minimum of {{ settings.MINIMUM_PASSWORD_LENGTH }} characters</em>
+      <br />
+      <p>
+        <button class="btn btn-sm btn-warning btn-block" type="submit">Change Password</button>
+      </p>
+    </form>
+  </div>
+  <div class="col-md-4"></div>
+
+</div>
+{% endblock %}

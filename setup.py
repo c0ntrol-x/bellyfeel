@@ -48,7 +48,7 @@ setup(
     install_requires=read_requirements(),
     include_package_data=True,
     package_data={
-        'bellyfeel': 'COPYING *.md bellyfeel/static bellyfeel/static/* bellyfeel/static/dist bellyfeel/static/dist/* bellyfeel/static/templates bellyfeel/static/templates/* ez_setup.py'.split(),
+        'bellyfeel': '*.cfg *.py *.rst *.txt COPYING bellyfeel/migrations bellyfeel/migrations/* bellyfeel/migrations/versions/* bellyfeel/static bellyfeel/static/* bellyfeel/static/dist bellyfeel/static/dist/* bellyfeel/templates bellyfeel/templates/* bellyfeel/templates/admin bellyfeel/templates/admin/*',
     },
     zip_safe=False,
 )

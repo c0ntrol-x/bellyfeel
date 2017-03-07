@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from bellyfeel.sql import User
-from tests.functional.scenarios import api_test
+from tests.functional.scenarios import session_url
 
 
-@api_test
+@session_url('/in')
 def test_admin_login_ok(context):
     ('POST /in with email + password should login an admin user')
 
@@ -24,15 +24,12 @@ def test_admin_login_ok(context):
         },
         headers={
             'Content-Type': 'multipart/form-data'
-        }
+        },
+        follow_redirects=True,
     )
 
     # Then it should have returned 302
     response.status_code.should.equal(302)
 
     # And it should have redirected
-    response.headers.should.have.key('Location').being.equal('http://localhost/')
-
-    response = context.http.get('/a/dash')
-
-    response.status_code.should.equal(200)
+    response.headers.should.have.key('Location').being.equal('http://localhost/a/dash')

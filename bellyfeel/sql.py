@@ -5,10 +5,13 @@ import sys
 import json
 import pyotp
 import qrcode
+import random
 import bcrypt
 from uuid import uuid4
 from collections import OrderedDict
 from datetime import datetime
+from datetime import timedelta
+from flask import url_for
 from flask_sqlalchemy import SQLAlchemy
 # from sqlalchemy.ext.declarative import declared_attr
 
@@ -61,6 +64,7 @@ class SQLSession(object):
                 cycles.append(self.session.add(model))
 
         ok = self.session.commit()
+        self.session.flush()
         return ok, cycles
 
     def create(self, *dirty_objects):
@@ -69,8 +73,26 @@ class SQLSession(object):
     def query_by(self, ModelClass, **kw):
         q = self.session.query(ModelClass)
         for field, value in kw.items():
+            if isinstance(value, BellyfeelModel):
+                value = value.id
+
+            operation = None
+            if '__' in field:
+                field, operation = field.split('__', 1)
+
             column = getattr(ModelClass.__table__.c, field)
-            q = q.filter(column == value)
+            if operation == 'not':
+                q = q.filter(column != value)
+            elif operation == 'gt':
+                q = q.filter(column > value)
+            elif operation == 'gte':
+                q = q.filter(column >= value)
+            elif operation == 'lt':
+                q = q.filter(column < value)
+            elif operation == 'lte':
+                q = q.filter(column <= value)
+            else:
+                q = q.filter(column == value)
 
         return q
 
@@ -122,6 +144,23 @@ class BellyfeelModel(db.Model):
 
     def __repr__(self):
         return '<{0}({1})>'.format(self.__class__.__name__, self.id and 'id={}'.format(self.id) or '')
+
+    def save(self):
+        session = SQLSession(db.session)
+        ok, cycles = session.modify(self)
+        return self
+
+    def delete(self):
+        db.session.execute(self.__table__.delete(self.__table__.c.id == self.id))
+        return db.session.commit()
+
+    @classmethod
+    def all(cls):
+        return cls.query_by()
+
+    @classmethod
+    def query_by(cls, **kw):
+        return SQLSession(db.session).query_by(cls, **kw)
 
     @classmethod
     def create(cls, **kw):
@@ -216,7 +255,7 @@ class User(BellyfeelModel):
 
     id = db.Column(db.Integer, primary_key=True)
     uuid = db.Column(db.String(32), default=lambda: uuid4().hex)
-    email = db.Column(db.String(256), unique=True)
+    email = db.Column(db.String(92))
     password = db.Column(db.String(128))
     activation_date = db.Column(db.DateTime, nullable=True)
     json_metadata = db.Column(db.Text, nullable=True)
@@ -224,9 +263,137 @@ class User(BellyfeelModel):
     is_admin = db.Column(db.Boolean, default=False)
     last_access_date = db.Column(db.DateTime, nullable=True)
     password_change_date = db.Column(db.DateTime, nullable=True)
+    first_name = db.Column(db.String(27))
+    last_name = db.Column(db.String(27))
+    photo_url = db.Column(db.UnicodeText)
+
+    def has_notifications(self):
+        return True
+
+    def must_reset_password(self):
+        max_expiration_date = datetime.utcnow() + timedelta(days=60)
+        return self.password_change_date is None or self.password_change_date >= max_expiration_date
+
+    def must_set_totp_token(self):
+        return self.totp_token is None
+
+    def get_notifications(self):
+        return [
+            {
+                'href': '#',
+                'message': 'Revision Feedback',
+                'badge': '2',
+                'level': 'success',
+            },
+            {
+                'href': '#',
+                'message': 'forum replies',
+                'badge': '27',
+            },
+        ]
+
+    def has_unread_messages(self):
+        return True
+
+    def get_unread_messages(self):
+        usernames = [
+            'd4v1ncy',
+            '0rbitaeolian',
+            'th0ughtcr1me',
+        ]
+        notme = sorted(set(usernames).difference({self.username}))
+
+        return [
+            {
+                'href': '#',
+                'when': '2 weeks ago',
+                'preview': 'Enjoy the UI mockups...',
+                'sender': random.choice(usernames),
+                'sender_image_path': url_for('static', filename='img/{}.jpeg'.format(random.choice(notme))),
+            },
+            {
+                'href': '#',
+                'preview': 'Hola ...',
+                'when': 'Yesterday at 4:20 PM',
+                'sender': random.choice(usernames),
+                'sender_image_path': url_for('static', filename='img/{}.jpeg'.format(random.choice(notme))),
+            },
+            {
+                'href': '#',
+                'sender': random.choice(usernames),
+                'preview': 'Oh, one more thing ...',
+                'when': 'about 27 minutes ago',
+                'sender_image_path': url_for('static', filename='img/{}.jpeg'.format(random.choice(notme))),
+            },
+        ]
 
     def initialize(self):
         self.api = UserAPIActionController(self)
+
+    def get_published(self):
+        return Content.query_by(author=self, self_destruct_date__lte=datetime.utcnow())
+
+    def total_published(self):
+        return self.get_published().count()
+
+    def get_expired(self):
+        return Content.query_by(author=self, self_destruct_date__lte=datetime.utcnow())
+
+    def total_expired(self):
+        return self.get_expired().count()
+
+    def get_drafts(self):
+        return Content.query_by(author=self, published_date=None)
+
+    def total_drafts(self):
+        return self.get_drafts().count()
+
+    def get_notes(self):
+        return Content.query_by(author=self, type='note')
+
+    def total_notes(self):
+        return self.get_notes().count()
+
+    def get_tasks(self):
+        return Content.query_by(author=self, type='task')
+
+    def total_tasks(self):
+        return self.get_tasks().count()
+
+    def get_reminders(self):
+        return Content.query_by(author=self, type='auto-reminder')
+
+    def total_reminders(self):
+        return self.get_reminders().count()
+
+    def get_comments(self):
+        return Comment.query_by(author=self)
+
+    def total_comments(self):
+        return self.get_comments().count()
+
+    def get_collaborations(self):
+        return Collaboration.query_by(peer=self)
+
+    def total_collaborations(self):
+        return self.get_collaborations().count()
+
+    def get_tags(self):
+        return Tag.query_by(author=self)
+
+    def total_tags(self):
+        return self.get_tags().count()
+
+    @property
+    def profile(self):
+        try:
+            return json.loads(self.json_metadata)
+        except (TypeError, ValueError):
+            return {}
+
+    @property
+    def username(self):
+        return self.email.split('@', 1)[0]
 
     @property
     def totp(self):
@@ -258,11 +425,6 @@ class User(BellyfeelModel):
         newpw = generate_password(17)
         if self.change_password(newpw):
             return newpw
-
-    def save(self):
-        session = SQLSession(db.session)
-        ok, cycles = session.modify(self)
-        return self
 
     def get_qrcode_png_bytes(self):
         out = io.BytesIO()
@@ -315,6 +477,11 @@ class User(BellyfeelModel):
 
         email = email.lower()
         password = cls.secretify_password(password)
+        if not kw.get('json_metadata'):
+            kw['json_metadata'] = json.dumps({
+                'prefer_markdown_editor': False,
+            })
+
         return super(User, cls).create(email=email, password=password, **kw)
 
     @classmethod
@@ -330,6 +497,68 @@ class User(BellyfeelModel):
         # import ipdb;ipdb.set_trace()
         user = db.session.query(User).filter_by(email=email).first()
         return user
+
+
+class Content(BellyfeelModel):
+    __tablename__ = 'content'
+
+    id = db.Column(db.Integer, primary_key=True)
+    uuid = db.Column(db.String(32), default=lambda: uuid4().hex)
+    author = DefaultForeignKey('author', 'auth_user.id')
+    type = db.Column(db.String(32), nullable=False)
+    title = db.Column(db.UnicodeText, nullable=True)
+    text = db.Column(db.UnicodeText, nullable=True)
+    git = db.Column(db.String(128), nullable=True)
+    creation_date = db.Column(db.DateTime, nullable=True)
+    approval_date = db.Column(db.DateTime, nullable=True)
+    published_date = db.Column(db.DateTime, nullable=True)
+    self_destruct_date = db.Column(db.DateTime, nullable=True)
+    json_metadata = db.Column(db.Text, nullable=True)
+    private_key = db.Column(db.Text, nullable=True)
+    public_key = db.Column(db.Text, nullable=True)
+
+    @property
+    def url(self):
+        return url_for('admin_edit_content_preferred', id=self.id)
+
+
+class Tag(BellyfeelModel):
+    __tablename__ = 'content_tag'
+
+    id = db.Column(db.Integer, primary_key=True)
+    uuid = db.Column(db.String(32), default=lambda: uuid4().hex)
+    parent = DefaultForeignKey('parent', 'content.id')
+    author = DefaultForeignKey('author', 'auth_user.id')
+    text = db.Column(db.UnicodeText, nullable=True)
+
+
+class Comment(BellyfeelModel):
+    __tablename__ = 'content_comment'
+
+    id = db.Column(db.Integer, primary_key=True)
+    uuid = db.Column(db.String(32), default=lambda: uuid4().hex)
+    parent = DefaultForeignKey('parent', 'content.id')
+    author = DefaultForeignKey('author', 'auth_user.id')
+    text = db.Column(db.UnicodeText, nullable=True)
+    creation_date = db.Column(db.DateTime, nullable=True)
+    approval_date = db.Column(db.DateTime, nullable=True)
+    published_date = db.Column(db.DateTime, nullable=True)
+
+
+class Collaboration(BellyfeelModel):
+    __tablename__ = 'collaboration'
+
+    id = db.Column(db.Integer, primary_key=True)
+    uuid = db.Column(db.String(32), default=lambda: uuid4().hex)
+    content = DefaultForeignKey('content', 'content.id')
+    author = DefaultForeignKey('peer', 'auth_user.id')
+    type = db.Column(db.String(32), nullable=False)
+    start_date = db.Column(db.DateTime, nullable=True)
+    end_date = db.Column(db.DateTime, nullable=True)
+    git = db.Column(db.String(128), nullable=True)
+    json_metadata = db.Column(db.Text, nullable=True)
+    private_key = db.Column(db.Text, nullable=True)
+    public_key = db.Column(db.Text, nullable=True)
 
 
 class BellyfeelException(Exception):

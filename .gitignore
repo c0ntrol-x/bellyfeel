@@ -13,3 +13,4 @@ mail/*
 provisioning/playbook.retry
 *.log
 provisioning/bellyfeelio-vault.yml
+build/

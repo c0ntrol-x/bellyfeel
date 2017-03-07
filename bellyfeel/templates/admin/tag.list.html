@@ -1,0 +1,30 @@
+{% extends "admin/base.html" %}
+{% block page_wrapper %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-12 col-sm-12">
+      <h1>Your Tags</h1>
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover table-striped">
+          <thead>
+            <tr>
+              <th>Text</th>
+              <th>Title</th>
+              <th>Author</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in tags %}
+            <tr>
+              <td>{{ item.content.text }}</td>
+              <td><a href="{{ item.url }}"><em>@{{ item.content.title }}</em></a></td>
+              <td><strong>@{{ item.content.author.username }}</strong></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "admin/base.html" %}
+{% block page_wrapper %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-12 col-sm-12">
+      <h1>Your Contents</h1>
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover table-striped">
+          <thead>
+            <tr>
+              <th><strong>Type</strong></th>
+              <th>Title</th>
+              <th>Author</th>
+              <th>Creation Date</th>
+              <th>Self-Destruct Date</th>
+              <th colspan="2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in content_list %}
+            <tr>
+              <a href="{{ item.url }}">
+                <td><code>{{ item.type }}</code></td>
+              <td><a href="{{ item.url }}">{{ item.title }}</a></td>
+              <td><strong>@{{ item.author.username }}</strong></td>
+              <td>{{ item.creation_date }}</td>
+              <td>{{ item.self_destruct_date or "[not set]" }}</td>
+              <td>
+                <a href="{{ url_for('admin_edit_content_preferred', id=item.id) }}" class="action-edit-content btn btn-large btn-warning"><i class="fa fa-2x fa-fw fa-pencil-square-o"></i>Edit</a>
+              </td>
+              <td>
+                <a href="{{ url_for('admin_delete_content', id=item.id) }}" class="action-delete-content btn btn-large btn-danger"><i class="fa fa-2x fa-fw fa-trash"></i>Delete</a>
+              </td>
+              </a>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -6,14 +6,16 @@ from __future__ import unicode_literals
 import sys
 import logging
 import argparse
+import warnings
 
+from bellyfeel.version import version
 from bellyfeel.sql import User, generate_password
 
 
 logger = logging.getLogger('bellyfeel')
 
 
-def execute_create_admin_user():  # pragma: no cover
+def bellyfeel_create_admin_user(argv):  # pragma: no cover
     """executes an instance of the beacon keep-alive server.
 
     :param ``--email``: ip address of the interface where it should listen to connections
@@ -34,7 +36,7 @@ def execute_create_admin_user():  # pragma: no cover
         help='Use this flag if you want to check if the given arguments are correct',
     )
 
-    args = parser.parse_args(sys.argv[1:])
+    args = parser.parse_args(argv)
 
     existing = User.get_by_email(args.email)
 
@@ -58,5 +60,38 @@ def execute_create_admin_user():  # pragma: no cover
     print "take note of the new password below:"
     print new_password
 
+
+def bellyfeel_version(argv):
+    print "Bellyfeel Backend v{}".format(version)
+
+
+def main():
+    HANDLERS = {
+        'version': bellyfeel_version,
+        'create-admin': bellyfeel_create_admin_user,
+        'admin': bellyfeel_create_admin_user,
+    }
+
+    parser = argparse.ArgumentParser(prog='bellyfeel')
+
+    parser.add_argument(
+        'command', help='Available commands:\n\n{0}\n'.format("|".join(HANDLERS.keys())))
+
+    argv = sys.argv[1:2]
+    args = parser.parse_args(argv)
+
+    if args.command not in HANDLERS:
+        parser.print_help()
+        raise SystemExit(1)
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        try:
+            HANDLERS[args.command](sys.argv[2:])
+        except Exception:
+            logging.exception("Failed to execute %s", args.command)
+            raise SystemExit(1)
+
+
 if __name__ == '__main__':
-    execute_create_admin_user()
+    main()

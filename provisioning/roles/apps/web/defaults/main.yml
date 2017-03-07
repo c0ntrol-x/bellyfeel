@@ -1,13 +1,46 @@
 ---
 
-venv_path: /srv/venv
-src_path: /srv/src
-frontend_static_path: /srv/src/bellyfeel/static
-tutnkapp_http_port: 4000
+bellyfeel_python_module_name: bellyfeel
+bellyfeel_relative_static_subpath: static/dist
+bellyfeel_mysql_force_drop_db: no
+bellyfeel_src_dir: /srv/bellyfeel/src
+bellyfeel_log_dir: /srv/bellyfeel/logs
+bellyfeel_venv_dir: /srv/bellyfeel/venv
+bellyfeel_www_root: /var/www/bellyfeel
+bellyfeel_www_static_dir: "{{ bellyfeel_www_root }}/static"
+
+bellyfeel_python_module_dir: "{{ bellyfeel_src_dir }}/{{ bellyfeel_python_module_name }}"
+bellyfeel_frontend_static_dist_path: "{{ bellyfeel_python_module_dir }}/{{ bellyfeel_relative_static_subpath }}"
+bllyflapp_http_port: 4242
 gunicorn_timeout: 10
 
-nginx_domains:
-  - fqdn: private.bellyfeel.audio
+bellyfeel_ssl:
+  - fqdn: bellyfeel.io
     ssl:
       key: |
-        -- SSL PRIVATE KEY ---
+        -----BEGIN RSA PRIVATE KEY-----
+        secretsecretsecretsecretsecrets
+        ecretsecretsecretsecretsecretse
+        cretsecretsecretsecretsecretsec
+        retsecretsecretsecretsecretsecr
+        etsecretsecretsecretsecretsecre
+        tsecretsecretsecretsecretsecret
+        ------END RSA PRIVATE KEY------
+      csr: |
+        ---BEGIN CERTIFICATE REQUEST---
+        secretsecretsecretsecretsecrets
+        ecretsecretsecretsecretsecretse
+        cretsecretsecretsecretsecretsec
+        retsecretsecretsecretsecretsecr
+        etsecretsecretsecretsecretsecre
+        tsecretsecretsecretsecretsecret
+        ----END CERTIFICATE REQUEST----
+      cert: |
+        -------BEGIN CERTIFICATE-------
+        secretsecretsecretsecretsecrets
+        ecretsecretsecretsecretsecretse
+        cretsecretsecretsecretsecretsec
+        retsecretsecretsecretsecretsecr
+        etsecretsecretsecretsecretsecre
+        tsecretsecretsecretsecretsecret
+        ---------END CERTIFICATE-------

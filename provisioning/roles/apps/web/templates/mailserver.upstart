@@ -11,4 +11,4 @@ chdir /srv/mail
 
 env INBOX_PORT=25
 
-exec {{ venv_path }}/bin/python /srv/src/mailserver.py
+exec {{ bellyfeel_venv_dir }}/bin/python {{ bellyfeel_src_dir }}/mailserver.py

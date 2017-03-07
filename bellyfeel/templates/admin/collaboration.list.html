@@ -1,0 +1,34 @@
+{% extends "admin/base.html" %}
+{% block page_wrapper %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-12 col-sm-12">
+      <h1>Your Collaborations</h1>
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover table-striped">
+          <thead>
+            <tr>
+              <th>Content</th>
+              <th>Author</th>
+              <th>Started At</th>
+              <th>Ended at</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in collaborations %}
+            <tr>
+              <a href="{{ item.url }}">
+              <td>{{ item.content.title }}</td>
+              <td><strong>@{{ item.content.author.username }}</strong></td>
+              <td>{{ item.start_date }}</td>
+              <td>{{ item.end_date }}</td>
+              </a>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -7,18 +7,18 @@ stop on runlevel [06]
 respawn
 respawn limit 5 60
 
-chdir /srv/src
+chdir {{ bellyfeel_src_dir }}
 
 {% for key, value in application_env.items() %}env {{ key }}={{ value }}
 {% endfor %}
 
-exec {{ venv_path }}/bin/gunicorn \
+exec {{ bellyfeel_venv_dir }}/bin/gunicorn \
      --error-logfile /var/log/gunicorn/bellyfeel-app.error.log \
      --access-logfile /var/log/gunicorn/bellyfeel-app.access.log \
      --log-level debug \
      {% for key, value in application_env.items() %}-e {{ key }}='{{ value }}' \
      {% endfor %}
-     --chdir /srv/src \
-     --pythonpath /srv/src \
-     -b 0.0.0.0:{{ tutnkapp_http_port }} \
+     --chdir {{ bellyfeel_src_dir }} \
+     --pythonpath {{ bellyfeel_src_dir }} \
+     -b 0.0.0.0:{{ bllyflapp_http_port }} \
      bellyfeel.application:server

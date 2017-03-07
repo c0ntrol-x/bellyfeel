@@ -38,7 +38,7 @@ def upgrade():
         'auth_user',
         db.Column('id', db.Integer, primary_key=True),
         db.Column('uuid', db.String(32)),
-        db.Column('email', db.String(256), unique=True),
+        db.Column('email', db.String(256)),
         db.Column('password', db.String(128)),
         db.Column('activation_date', db.DateTime, nullable=True),
         db.Column('json_metadata', db.Text, nullable=True),
