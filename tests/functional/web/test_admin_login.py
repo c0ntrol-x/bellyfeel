@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+import json
 from bellyfeel.sql import User
 from tests.functional.scenarios import session_url
 
@@ -18,12 +18,13 @@ def test_admin_login_ok(context):
     # When I request a login
     response = context.http.post(
         '/in',
-        data={
+        data=json.dumps({
             'email': email,
             'password': password,
-        },
+            'repeat_new_password': password,
+        }),
         headers={
-            'Content-Type': 'multipart/form-data'
+            'Content-Type': 'application/json'
         },
         follow_redirects=True,
     )

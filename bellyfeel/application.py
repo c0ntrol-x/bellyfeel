@@ -13,7 +13,6 @@ from flask import session
 from flask import url_for
 from flask import redirect
 from p4rr0t007.lib.core import slugify
-from p4rr0t007.lib.core import get_logger
 
 from bellyfeel.sql import db
 from bellyfeel.sql import SQLSession
@@ -26,7 +25,10 @@ from bellyfeel.http import logger
 from bellyfeel.http import node
 
 
-logger = get_logger('bellyfeel.application')
+def log_and_respond_bad_request(template_name, error_message):
+    logger.warning(error_message)
+    errors = [error_message]
+    return server.template_response(template_name, dict(errors=errors), code=400)
 
 
 @server.route("/")
@@ -74,7 +76,7 @@ def admin_only(func):
 
             return func(*args, **kw)
         else:
-            logger.info('unauthorized access')
+            logger.warning('unauthorized access')
             return server.template_response('forbidden.html', code=403)
 
     return wrapper
@@ -372,26 +374,31 @@ def admin_change_password_post():
     current_password = request.form['current_password']
     new_password = request.form['new_password']
     repeat_new_password = request.form['repeat_new_password']
+    template_name = 'admin/change_password.html'
 
     if len(new_password) < settings.MINIMUM_PASSWORD_LENGTH:
-        return server.template_response('admin/change_password.html', dict(user=g.user, errors=[
-            'password must have at least 12 characters'
-        ]), code=400)
+        return log_and_respond_bad_request(
+            template_name,
+            'password must have at least 12 characters',
+        )
 
     if not g.user.match_password(current_password):
-        return server.template_response('admin/change_password.html', dict(user=g.user, errors=[
-            'invalid password'
-        ]), code=400)
+        return log_and_respond_bad_request(
+            template_name,
+            'invalid password',
+        )
 
     if new_password != repeat_new_password:
-        return server.template_response('admin/change_password.html', dict(user=g.user, errors=[
-            'password confirmation mismatch'
-        ]), code=400)
+        return log_and_respond_bad_request(
+            template_name,
+            'invalid password',
+        )
 
     if not g.user.change_password(new_password):
-        return server.template_response('admin/change_password.html', dict(user=g.user, errors=[
-            'failed to change password'
-        ]), code=400)
+        return log_and_respond_bad_request(
+            template_name,
+            'failed to change password',
+        )
 
     return redirect(url_for('admin_dashboard'))
 
