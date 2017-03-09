@@ -271,8 +271,11 @@ class User(BellyfeelModel):
         return True
 
     def must_reset_password(self):
-        max_expiration_date = datetime.utcnow() + timedelta(days=60)
-        return self.password_change_date is None or self.password_change_date >= max_expiration_date
+        if self.password_change_date is None:
+            return True
+
+        max_expiration_date = self.password_change_date + timedelta(days=60)
+        return self.password_change_date >= max_expiration_date
 
     def must_set_totp_token(self):
         return self.totp_token is None
@@ -419,6 +422,7 @@ class User(BellyfeelModel):
 
     def change_password(self, newpw):
         self.password = self.secretify_password(newpw)
+        self.password_change_date = datetime.utcnow()
         return self.save()
 
     def reset_password(self):

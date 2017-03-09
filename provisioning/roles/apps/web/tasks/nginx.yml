@@ -1,0 +1,47 @@
+---
+# =====================================================
+#
+#                         88
+#                         ""
+#
+# 8b,dPPYba,   ,adPPYb,d8 88 8b,dPPYba,  8b,     ,d8
+# 88P'   `"8a a8"    `Y88 88 88P'   `"8a  `Y8, ,8P'
+# 88       88 8b       88 88 88       88    )888(
+# 88       88 "8a,   ,d88 88 88       88  ,d8" "8b,
+# 88       88  `"YbbdP"Y8 88 88       88 8P'     `Y8
+#              aa,    ,88
+#               "Y8bbdP"
+#
+# .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..
+
+- name: install nginx main file
+  template:
+    src: nginx.conf
+    dest: /etc/nginx/nginx.conf
+    owner: root
+    group: root
+    mode: 644
+  notify: restart nginx
+
+- name: ensuring default nginx site is not there
+  file:
+    state: "absent"
+    path: "/etc/nginx/sites-enabled/default"
+
+- name: install nginx site config file
+  template:
+    src: app.conf
+    dest: /etc/nginx/sites-available/bellyfeel.conf
+    owner: root
+    group: root
+    mode: 644
+  notify: restart nginx
+
+- name: enable nginx site config file
+  file:
+    state: "link"
+    src: "/etc/nginx/sites-available/bellyfeel.conf"
+    dest: "/etc/nginx/sites-enabled/bellyfeel.conf"
+    owner: "www-data"
+    group: "www-data"
+  notify: restart nginx

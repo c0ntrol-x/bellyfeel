@@ -1,0 +1,31 @@
+---
+
+#             88
+#             ""   ,d
+#                  88
+#  ,adPPYb,d8 88 MM88MMM ,adPPYba, ,adPPYYba,
+# a8"    `Y88 88   88   a8P_____88 ""     `Y8
+# 8b       88 88   88   8PP""""""" ,adPPPPP88
+# "8a,   ,d88 88   88,  "8b,   ,aa 88,    ,88
+#  `"YbbdP"Y8 88   "Y888 `"Ybbd8"' `"8bbdP"Y8
+#  aa,    ,88
+#   "Y8bbdP"
+
+
+# - name: install docker-py globally
+#   pip:
+#     name: docker-py
+#     state: latest
+
+# - name: ensure gitea is running
+#   docker:
+#     name: gitea
+#     hostname: git.bellyfeel.io
+#     image: gitea/gitea
+#     state: reloaded
+#     pull: always
+#     volumes:
+#       /srv/gitea:/data
+#     ports:
+#       - 10022:22
+#       - 10080:3000
