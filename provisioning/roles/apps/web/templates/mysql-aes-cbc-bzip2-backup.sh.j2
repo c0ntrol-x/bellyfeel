@@ -3,8 +3,8 @@
 bin_vault="{{ bellyfeel_venv_dir }}/bin/ansible-vault"
 now="$(date +"%Y.%m.%d_%Hh%Mm.log")"
 backup_sql_path="{{ bellyfeel_backups_dir }}/mysql_backup_${now}.sql"
-backup_tarball_path="${backup_sql_path}.tar.xz"
-encrypted_backup_path="${backup_sql_path}.aes"
+compressed_backup_path="${backup_sql_path}.xz"
+encrypted_backup_path="${compressed_backup_path}.aes"
 log_path="{{ bellyfeel_log_dir }}/mysql_backups.log"
 private_key_path="{{ bellyfeel_mysql_backup_private_key_path }}"
 
@@ -19,12 +19,12 @@ function mysql_backup_succeeded() {
 }
 function backup_compression_succeeded() {
     log "compressing backup with lzma"
-    tar cJvf "${backup_tarball_path}" "${backup_sql_path}" >> "${log_path}"
+    xz -z "${backup_sql_path}"
     return $?
 }
-function tarball_encryption_succeeded() {
+function backup_encryption() {
     log "encrypting backup with ansible-vault"
-    ${bin_vault} --vault-password-file="${private_key_path}" encrypt "${backup_tarball_path}" --output="${encrypted_backup_path}"
+    ${bin_vault} --vault-password-file="${private_key_path}" encrypt "${compressed_backup_path}" --output="${encrypted_backup_path}"
     return $?
 }
 
@@ -44,17 +44,18 @@ function erase_file(){
 }
 
 function erase_files_safe() {
-    erase_file "${backup_tarball_path}"
+    erase_file "${compressed_backup_path}"
     erase_file "${backup_sql_path}"
 }
 
+set -e
 if mysql_backup_succeeded; then
     log "mysql backup succeeded"
 
     if backup_compression_succeeded; then
         log "mysql backup compressed"
 
-        if tarball_encryption_succeeded; then
+        if backup_encryption; then
             log "mysql backup encrypted "
         else
             log "[ERROR] failed to encrypt mysql backup"

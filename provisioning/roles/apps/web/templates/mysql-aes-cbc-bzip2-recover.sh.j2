@@ -1,10 +1,15 @@
 #!/bin/bash
 
+encrypted_backup_path="${1}"
+if [ -z "${encrypted_backup_path}" ]; then
+    echo "USAGE: ${0} path/to/backup.sql.xz.aes"
+    exit 1
+fi
+
 bin_vault="{{ bellyfeel_venv_dir }}/bin/ansible-vault"
 now="$(date +"%Y.%m.%d_%Hh%Mm.log")"
 backup_sql_path="{{ bellyfeel_backups_dir }}/mysql_backup_${now}.sql"
-backup_tarball_path="${backup_sql_path}.tar.xz"
-encrypted_backup_path="${backup_sql_path}.aes"
+compressed_backup_path="${backup_sql_path}.xz"
 log_path="{{ bellyfeel_log_dir }}/mysql_recoveries.log"
 private_key_path="{{ bellyfeel_mysql_backup_private_key_path }}"
 
@@ -12,19 +17,19 @@ function log() {
     echo -e "[$(date +"%Y-%m-%d %H:%M:%S")] - $(hostname): ${*}" >> "${log_path}"
 }
 
-function mysql_backup_succeeded() {
-    log "generating backup with mysqldump"
-    mysqldump -u "{{ bellyfeel_mysql_user }}" --password="{{ bellyfeel_mysql_password }}" "{{ bellyfeel_mysql_db }}" >> "${log_path}"
+function mysql_recovery_succeeded() {
+    log "loading ${backup_sql_path} into mysql"
+    mysql -u "{{ bellyfeel_mysql_user }}" --password="{{ bellyfeel_mysql_password }}" "{{ bellyfeel_mysql_db }}" < "${backup_sql_path}"
     return $?
 }
-function backup_compression_succeeded() {
-    log "compressing backup with lzma"
-    tar cJvf "${backup_tarball_path}" "${backup_sql_path}" >> "${log_path}"
+function backup_decompression_succeeded() {
+    log "decompressing backup with lzma"
+    tar xJvf "${compressed_backup_path}"
     return $?
 }
-function tarball_encryption_succeeded() {
-    log "encrypting backup with ansible-vault"
-    ${bin_vault} --vault-password-file="${private_key_path}" encrypt "${backup_tarball_path}" --output="${encrypted_backup_path}"
+function backup_decryption_succeeded() {
+    log "decrypting backup with ansible-vault"
+    ${bin_vault} --vault-password-file="${private_key_path}" decrypt "${encrypted_backup_path}" --output="${compressed_backup_path}"
     return $?
 }
 
@@ -44,20 +49,21 @@ function erase_file(){
 }
 
 function erase_files_safe() {
-    erase_file "${backup_tarball_path}"
+    erase_file "${compressed_backup_path}"
     erase_file "${backup_sql_path}"
 }
 
-if mysql_backup_succeeded; then
-    log "mysql backup succeeded"
+set -e
+if backup_decryption_succeeded; then
+    log "mysql backup decryption succeeded"
 
-    if backup_compression_succeeded; then
-        log "mysql backup compressed"
+    if backup_decryption_succeeded; then
+        log "mysql backup decompressed"
 
-        if tarball_encryption_succeeded; then
-            log "mysql backup encrypted "
+        if mysql_recovery_succeeded; then
+            log "mysql backup recovered! "
         else
-            log "[ERROR] failed to encrypt mysql backup"
+            log "[ERROR] failed to decrypt mysql backup"
         fi
     else
         log "[ERROR] failed to compress mysql backup"

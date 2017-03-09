@@ -94,13 +94,15 @@
     group: root
 
   with_items:
-    - "{{ bellyfeel_src_dir }}"
-    - "{{ bellyfeel_venv_dir }}"
-    - "{{ bellyfeel_log_dir }}"
     - "{{ bellyfeel_backups_dir }}"
     - "{{ bellyfeel_private_dir }}"
-    - "{{ bellyfeel_static_dir }}"
     - "{{ bellyfeel_git_dir }}"
+    - "{{ bellyfeel_log_dir }}"
+    - "{{ bellyfeel_src_dir }}"
+    - "{{ bellyfeel_static_dir }}"
+    - "{{ bellyfeel_tools_dir }}"
+    - "{{ bellyfeel_venv_dir }}"
+    - "{{ bellyfeel_www_root }}"
 
 - name: ensure log dirs
   file:
@@ -348,23 +350,23 @@
 #   "Y8bbdP"
 
 
-- name: install docker-py globally
-  pip:
-    name: docker-py
-    state: latest
+# - name: install docker-py globally
+#   pip:
+#     name: docker-py
+#     state: latest
 
-- name: ensure gitea is running
-  docker:
-    name: gitea
-    hostname: git.bellyfeel.io
-    image: gitea/gitea
-    state: reloaded
-    pull: always
-    volumes:
-      /srv/gitea:/data
-    ports:
-      - 10022:22
-      - 10080:3000
+# - name: ensure gitea is running
+#   docker:
+#     name: gitea
+#     hostname: git.bellyfeel.io
+#     image: gitea/gitea
+#     state: reloaded
+#     pull: always
+#     volumes:
+#       /srv/gitea:/data
+#     ports:
+#       - 10022:22
+#       - 10080:3000
 
 
 # ========================================================
@@ -398,13 +400,7 @@
 # .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..
 
 
-- name: install ansible locally
-  pip:
-    name: ansible
-    state: latest
-
-
-- name: [sysadmin tools] bellyfeel environment bash lib
+- name: "[sysadmin tools] bellyfeel environment bash lib"
   template:
     src: "env.sh.j2"
     dest: "{{ bellyfeel_tools_dir }}/env.sh"
@@ -453,4 +449,4 @@
 
 
 - name: "backup mysql"
-  shell: "{{ bellyfeel_tools_dir }}/mysql-aes-cbc-bzip2-recover.sh"
+  shell: "{{ bellyfeel_tools_dir }}/mysql-aes-cbc-bzip2-backup.sh"
