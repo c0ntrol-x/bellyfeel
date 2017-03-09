@@ -90,10 +90,17 @@
   file:
     state: "directory"
     path: "{{ item }}"
+    owner: root
+    group: root
+
   with_items:
     - "{{ bellyfeel_src_dir }}"
     - "{{ bellyfeel_venv_dir }}"
     - "{{ bellyfeel_log_dir }}"
+    - "{{ bellyfeel_backups_dir }}"
+    - "{{ bellyfeel_private_dir }}"
+    - "{{ bellyfeel_static_dir }}"
+    - "{{ bellyfeel_git_dir }}"
 
 - name: ensure log dirs
   file:
@@ -189,14 +196,6 @@
     mode: 644
 
   notify: restart bellyfeel-app
-
-- name: install sysadmin helper script
-  template:
-    src: "env.sh.j2"
-    dest: "/srv/env.sh"
-    owner: root
-    group: root
-    mode: 644
 
 - name: install bellyfeel-app upstart logrotate
   template:
@@ -337,6 +336,36 @@
   notify: restart nginx
 
 
+#             88
+#             ""   ,d
+#                  88
+#  ,adPPYb,d8 88 MM88MMM ,adPPYba, ,adPPYYba,
+# a8"    `Y88 88   88   a8P_____88 ""     `Y8
+# 8b       88 88   88   8PP""""""" ,adPPPPP88
+# "8a,   ,d88 88   88,  "8b,   ,aa 88,    ,88
+#  `"YbbdP"Y8 88   "Y888 `"Ybbd8"' `"8bbdP"Y8
+#  aa,    ,88
+#   "Y8bbdP"
+
+
+- name: install docker-py globally
+  pip:
+    name: docker-py
+    state: latest
+
+- name: ensure gitea is running
+  docker:
+    name: gitea
+    hostname: git.bellyfeel.io
+    image: gitea/gitea
+    state: reloaded
+    pull: always
+    volumes:
+      /srv/gitea:/data
+    ports:
+      - 10022:22
+      - 10080:3000
+
 
 # ========================================================
 #
@@ -367,3 +396,61 @@
 #   88,  "8a,   ,a8" "8a,   ,a8" 88 aa    ]8I
 #   "Y888 `"YbbdP"'   `"YbbdP"'  88 `"YbbdP"'
 # .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..
+
+
+- name: install ansible locally
+  pip:
+    name: ansible
+    state: latest
+
+
+- name: [sysadmin tools] bellyfeel environment bash lib
+  template:
+    src: "env.sh.j2"
+    dest: "{{ bellyfeel_tools_dir }}/env.sh"
+    owner: root
+    group: root
+    mode: 644
+
+
+# ====================================================================
+#
+#  88                                88
+#  88                                88
+#  88                                88
+#  88,dPPYba,  ,adPPYYba,  ,adPPYba, 88   ,d8 88       88 8b,dPPYba,
+#  88P'    "8a ""     `Y8 a8"     "" 88 ,a8"  88       88 88P'    "8a
+#  88       d8 ,adPPPPP88 8b         8888[    88       88 88       d8
+#  88b,   ,a8" 88,    ,88 "8a,   ,aa 88`"Yba, "8a,   ,a88 88b,   ,a8"
+#  8Y"Ybbd8"'  `"8bbdP"Y8  `"Ybbd8"' 88   `Y8a `"YbbdP'Y8 88`YbbdP"'
+#                                                         88
+#                                                         88
+# .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..
+
+- name: "mysql backup key"
+  copy:
+    mode: 0600  # PRIVATE FILE SHOULD BE SEEN BY ITS OWNER ONLY!!!
+    dest: "{{ bellyfeel_mysql_backup_private_key_path }}"
+    content: "{{ bellyfeel_mysql_backup_private_key }}"
+    owner: root
+    group: root
+
+- name: "mysql backup script"
+  template:
+    mode: 0700  # PRIVATE FILE SHOULD BE SEEN BY ITS OWNER ONLY!!!
+    src: "mysql-aes-cbc-bzip2-backup.sh.j2"
+    dest: "{{ bellyfeel_tools_dir }}/mysql-aes-cbc-bzip2-backup.sh"
+    owner: root
+    group: root
+
+- name: "mysql backup recovery script"
+  template:
+    mode: 0700  # PRIVATE FILE SHOULD BE SEEN BY ITS OWNER ONLY!!!
+    src: "mysql-aes-cbc-bzip2-recover.sh.j2"
+    dest: "{{ bellyfeel_tools_dir }}/mysql-aes-cbc-bzip2-recover.sh"
+    owner: root
+    group: root
+
+
+- name: "backup mysql"
+  shell: "{{ bellyfeel_tools_dir }}/mysql-aes-cbc-bzip2-recover.sh"

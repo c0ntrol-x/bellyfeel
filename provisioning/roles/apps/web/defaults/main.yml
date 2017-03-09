@@ -3,11 +3,19 @@
 bellyfeel_python_module_name: bellyfeel
 bellyfeel_relative_static_subpath: static/dist
 bellyfeel_mysql_force_drop_db: no
-bellyfeel_src_dir: /srv/bellyfeel/src
+
+bellyfeel_backups_dir: /srv/bellyfeel/backups
+bellyfeel_git_dir: /srv/bellyfeel/gitea
 bellyfeel_log_dir: /srv/bellyfeel/logs
+bellyfeel_private_dir: /srv/bellyfeel/private
+bellyfeel_src_dir: /srv/bellyfeel/src
+bellyfeel_static_dir: /var/www/bellyfeel/static
+bellyfeel_tools_dir: /srv/bellyfeel/tools
 bellyfeel_venv_dir: /srv/bellyfeel/venv
 bellyfeel_www_root: /var/www/bellyfeel
 bellyfeel_www_static_dir: "{{ bellyfeel_www_root }}/static"
+
+
 
 bellyfeel_python_module_dir: "{{ bellyfeel_src_dir }}/{{ bellyfeel_python_module_name }}"
 bellyfeel_frontend_static_dist_path: "{{ bellyfeel_python_module_dir }}/{{ bellyfeel_relative_static_subpath }}"

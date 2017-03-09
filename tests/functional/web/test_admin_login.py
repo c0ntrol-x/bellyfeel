@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import json
+import json  # noqa
 from bellyfeel.sql import User
 from tests.functional.scenarios import session_url
 
@@ -23,9 +23,9 @@ def test_admin_login_ok(context):
             'password': password,
             'repeat_new_password': password,
         },
-        # headers={
-        #     'Content-Type': 'application/json'
-        # },
+        headers={
+            'Content-Type': 'multipart/form-data'
+        },
         follow_redirects=True,
     )
 
