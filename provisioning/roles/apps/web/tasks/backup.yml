@@ -1,0 +1,43 @@
+---
+# ====================================================================
+#
+#  88                                88
+#  88                                88
+#  88                                88
+#  88,dPPYba,  ,adPPYYba,  ,adPPYba, 88   ,d8 88       88 8b,dPPYba,
+#  88P'    "8a ""     `Y8 a8"     "" 88 ,a8"  88       88 88P'    "8a
+#  88       d8 ,adPPPPP88 8b         8888[    88       88 88       d8
+#  88b,   ,a8" 88,    ,88 "8a,   ,aa 88`"Yba, "8a,   ,a88 88b,   ,a8"
+#  8Y"Ybbd8"'  `"8bbdP"Y8  `"Ybbd8"' 88   `Y8a `"YbbdP'Y8 88`YbbdP"'
+#                                                         88
+#                                                         88
+# .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..
+
+- name: "mysql backup key"
+  copy:
+    mode: 0600  # PRIVATE FILE SHOULD BE SEEN BY ITS OWNER ONLY!!!
+    dest: "{{ bellyfeel_mysql_backup_private_key_path }}"
+    content: "{{ bellyfeel_mysql_backup_private_key }}"
+    owner: root
+    group: root
+
+- name: "mysql backup script"
+  template:
+    mode: 0700  # PRIVATE FILE SHOULD BE SEEN BY ITS OWNER ONLY!!!
+    src: "mysql-aes-cbc-bzip2-backup.sh.j2"
+    dest: "{{ bellyfeel_tools_dir }}/mysql-aes-cbc-bzip2-backup.sh"
+    owner: root
+    group: root
+
+- name: "mysql backup recovery script"
+  template:
+    mode: 0700  # PRIVATE FILE SHOULD BE SEEN BY ITS OWNER ONLY!!!
+    src: "mysql-aes-cbc-bzip2-recover.sh.j2"
+    dest: "{{ bellyfeel_tools_dir }}/mysql-aes-cbc-bzip2-recover.sh"
+    owner: root
+    group: root
+
+
+- name: "backup mysql"
+  shell: "{{ bellyfeel_tools_dir }}/mysql-aes-cbc-bzip2-backup.sh"
+  ignore_errors: yes

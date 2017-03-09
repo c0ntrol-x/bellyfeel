@@ -2,11 +2,13 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
+import io
 import os
 import functools
 import hashlib
 from datetime import datetime
 from flask import request
+from flask import Response
 
 from flask import g
 from flask import session
@@ -62,7 +64,7 @@ def admin_only(func):
     def wrapper(*args, **kw):
         if g.user and g.user.is_admin:
             context = dict(user=g.user)
-            if g.user.must_reset_password():
+            if settings.FORCE_TOTP_TOKEN_ON_FIRST_LOGIN and g.user.must_reset_password():
                 context['errors'] = [
                     'your password must be reset before proceeding'
                 ]
@@ -367,6 +369,15 @@ def admin_mail():
 @admin_only
 def admin_dashboard():
     return server.template_response('admin/index.html', dict(user=g.user))
+
+
+@server.route("/s/totp.png")
+@admin_only
+def admin_render_temporary_totp_token():
+    pngbytes = io.BytesIO()
+    g.user.write_qrcode_to_buffer(pngbytes)
+    pngbytes.seek(0)
+    return Response(pngbytes, headers={'Content-Type': 'application/octet-stream'})
 
 
 @server.route("/account/password/change", methods=['POST'])

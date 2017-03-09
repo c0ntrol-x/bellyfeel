@@ -1,0 +1,189 @@
+# ===================================
+#
+# ,adPPYYba, 8b,dPPYba,  8b,dPPYba,
+# ""     `Y8 88P'    "8a 88P'    "8a
+# ,adPPPPP88 88       d8 88       d8
+# 88,    ,88 88b,   ,a8" 88b,   ,a8"
+# `"8bbdP"Y8 88`YbbdP"'  88`YbbdP"'
+#            88          88
+#            88          88
+#
+# .. .. .. .. .. .. .. .. .. .. .. ..
+
+- name: "installing dependencies"
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600
+    autoremove: yes
+
+  with_items:
+    - bash-completion
+    - build-essential
+    - ca-certificates
+    - curl
+    - docker.io
+    - emacs24-nox
+    - git
+    - git-svn
+    - gnupg
+    - gnupg2
+    - htop
+    - libev-dev
+    - libffi-dev
+    - libmp3lame-dev
+    - libmysqlclient-dev
+    - libnacl-dev
+    - libssl-dev
+    - libudev-dev
+    - libxml2-dev
+    - libxslt1-dev
+    - libzmq-dev
+    - mysql-client
+    - mysql-server
+    - nginx
+    - ntp
+    - pkg-config
+    - python
+    - python-dev
+    - python-mysqldb
+    - python-pip
+    - python-virtualenv
+    - redis-server
+    - redis-tools
+    - rng-tools
+    - rsync
+    - subversion
+    - telnet
+    - tree
+    - vim
+    - virtualenvwrapper
+    - wget
+    - libxml2-dev
+    - libxslt1-dev
+
+- name: ensure bellyfeel-related folders
+  file:
+    state: "directory"
+    path: "{{ item }}"
+    owner: root
+    group: root
+
+  with_items:
+    - "{{ bellyfeel_backups_dir }}"
+    - "{{ bellyfeel_private_dir }}"
+    - "{{ bellyfeel_git_dir }}"
+    - "{{ bellyfeel_log_dir }}"
+    - "{{ bellyfeel_src_dir }}"
+    - "{{ bellyfeel_static_dir }}"
+    - "{{ bellyfeel_tools_dir }}"
+    - "{{ bellyfeel_venv_dir }}"
+    - "{{ bellyfeel_www_root }}"
+
+- name: ensure log dirs
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0775
+    owner: root
+    group: root
+  notify: nginx permissions to bellyfeel assets
+  with_items:
+    - "{{ bellyfeel_log_dir }}/gunicorn"
+    - "{{ bellyfeel_log_dir }}/nginx"
+    - "{{ bellyfeel_log_dir }}/workers"
+
+- name: create base nginx folders
+  file:
+    path: "{{ item }}"
+    state: "directory"
+    owner: www-data
+    group: www-data
+    mode: 0755
+
+  notify:
+    - restart nginx
+  with_items:
+    - "{{ bellyfeel_www_root }}"
+    - "{{ bellyfeel_www_static_dir }}"
+
+- name: rsync static files to the safe remote folder
+  synchronize:
+    src: "{{ local_repository_root_path }}/{{ bellyfeel_python_module_name }}/{{ bellyfeel_relative_static_subpath }}"
+    dest: "{{ bellyfeel_www_static_dir }}"
+    recursive: yes
+    perms: yes
+    compress: yes
+
+  notify:
+    - restart nginx
+
+
+
+- name: rsync local codebase contents to the server
+  synchronize:
+    src: "{{ local_repository_root_path }}"
+    dest: "{{ bellyfeel_src_dir }}"
+    recursive: yes
+    perms: yes
+    compress: yes
+
+  notify:
+    - restart bellyfeel-app
+
+- name: install latest setuptools
+  pip:
+    name: setuptools
+    state: latest
+    virtualenv: "{{ bellyfeel_venv_dir }}"
+
+- name: install latest pip
+  pip:
+    state: latest
+    name: pip
+    virtualenv: "{{ bellyfeel_venv_dir }}"
+
+- name: install requirements
+  pip:
+    requirements: "{{ bellyfeel_src_dir }}/requirements.txt"
+    virtualenv: "{{ bellyfeel_venv_dir }}"
+
+- name: ensure bellyfeel is not installed
+  pip:
+    state: "absent"
+    name: "bellyfeel"
+    virtualenv: "{{ bellyfeel_venv_dir }}"
+
+- name: install python application module
+  pip:
+    name: "file://{{ bellyfeel_src_dir }} "
+    virtualenv: "{{ bellyfeel_venv_dir }}"
+    state: present
+
+- name: install bellyfeel-app upstart script
+  file:
+    path: "/etc/init/python-app.conf"
+    state: absent
+
+- name: install bellyfeel-app upstart script
+  template:
+    src: "gunicorn.upstart"
+    dest: "/etc/init/bellyfeel-app.conf"
+    owner: root
+    group: root
+    mode: 644
+
+  notify: restart bellyfeel-app
+
+- name: install bellyfeel-app upstart logrotate
+  template:
+    src: "logrotate.gunicorn.j2"
+    dest: "/etc/logrotate.d/bellyfeel-app"
+    owner: root
+    group: root
+    mode: 644
+
+- name: test bellyfeel-app upstart script
+  shell: init-checkconf /etc/init/bellyfeel-app.conf && initctl check-config bellyfeel-app
+  notify: restart bellyfeel-app
