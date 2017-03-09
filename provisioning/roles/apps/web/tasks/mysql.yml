@@ -1,0 +1,74 @@
+---
+# ====================================================================
+
+# 88b           d88              ad88888ba    ,ad8888ba,   88
+# 888b         d888             d8"     "8b  d8"'    `"8b  88
+# 88`8b       d8'88             Y8,         d8'        `8b 88
+# 88 `8b     d8' 88 8b       d8 `Y8aaaaa,   88          88 88
+# 88  `8b   d8'  88 `8b     d8'   `"""""8b, 88          88 88
+# 88   `8b d8'   88  `8b   d8'          `8b Y8,    "88,,8P 88
+# 88    `888'    88   `8b,d8'   Y8a     a8P  Y8a.    Y88P  88
+# 88     `8'     88     Y88'     "Y88888P"    `"Y8888Y"Y8a 88888888888
+#                       d8'
+#                      d8'
+#
+# .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. ..
+
+- name: "set password for mysql root"
+  mysql_user:
+    user: root
+    password: "{{ bellyfeel_mysql_root_password }}"
+    state: present
+  ignore_errors: yes
+
+- name: "create mysql user"
+  mysql_user:
+    login_user: root
+    login_password: "{{ bellyfeel_mysql_root_password }}"
+    name: "{{ bellyfeel_mysql_user }}"
+    password: "{{ bellyfeel_mysql_password }}"
+    update_password: always
+    state: present
+  when: bellyfeel_mysql_force_drop_db
+
+- name: "set password for mysql user"
+  mysql_user:
+    login_user: root
+    login_password: "{{ bellyfeel_mysql_root_password }}"
+    name: "{{ bellyfeel_mysql_user }}"
+    password: "{{ bellyfeel_mysql_password }}"
+    host: localhost
+    state: present
+    host_all: yes
+    update_password: always
+    priv: '*.*:ALL,GRANT'
+
+
+- name: drop mysql database
+  mysql_db:
+    name: "{{ bellyfeel_mysql_db }}"
+    login_user: root
+    login_password: "{{ bellyfeel_mysql_root_password }}"
+    state: absent
+  when: bellyfeel_mysql_force_drop_db
+
+- name: setup mysql database
+  mysql_db:
+    name: "{{ bellyfeel_mysql_db }}"
+    login_user: root
+    login_password: "{{ bellyfeel_mysql_root_password }}"
+    state: present
+    encoding: "utf8"
+
+- name: place alembic config
+  template:
+    src: alembic.ini.j2
+    dest: "{{ bellyfeel_src_dir }}/bellyfeel/migrations/alembic.ini"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: running alembic migrations
+  shell: "{{ bellyfeel_venv_dir }}/bin/alembic -c bellyfeel/migrations/alembic.ini upgrade head"
+  args:
+    chdir: "{{ bellyfeel_src_dir }}"
