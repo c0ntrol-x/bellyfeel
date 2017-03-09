@@ -76,7 +76,7 @@ def admin_only(func):
 
             return func(*args, **kw)
         else:
-            logger.warning('unauthorized access')
+            logger.warning('unauthorized access {}'.format(repr(dict(request.headers))))
             return server.template_response('forbidden.html', code=403)
 
     return wrapper

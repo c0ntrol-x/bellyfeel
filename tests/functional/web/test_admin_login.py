@@ -18,14 +18,14 @@ def test_admin_login_ok(context):
     # When I request a login
     response = context.http.post(
         '/in',
-        data=json.dumps({
+        data={
             'email': email,
             'password': password,
             'repeat_new_password': password,
-        }),
-        headers={
-            'Content-Type': 'application/json'
         },
+        # headers={
+        #     'Content-Type': 'application/json'
+        # },
         follow_redirects=True,
     )
 
