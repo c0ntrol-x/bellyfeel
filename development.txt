@@ -1,9 +1,8 @@
 -r requirements.txt
 coverage==4.1
+dopy==0.3.7
+ipdb==0.10.2
 nose==1.3.7
 rednose==1.2.1
 sure==1.2.25
-dopy==0.3.7
 yamllint==1.6.0
-alembic==0.9.1
-ipdb==0.10.2
