@@ -8,7 +8,7 @@ html5lib==0.999999999
 htmlmin==0.1.10
 inbox.py==0.0.6
 ipython==4.1.2
-lxml==3.7.3
+lxml==4.9.1
 mysql-python==1.2.5
 p4rr0t007==0.1.17
 passlib==1.6.5
