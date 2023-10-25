@@ -66,6 +66,6 @@ texttable==0.8.4
 traitlets==4.2.1
 urllib3==1.14
 websocket-client==0.35.0
-Werkzeug==0.11.5
+Werkzeug==3.0.1
 youtube-dl==2015.11.10
 coloredlogs==5.0
